@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.14)
-project(mnist_data_recognition)
+FetchContent_Declare(eigen3
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+        GIT_TAG 9441d94dccccd5db8d64179516fdc5b53994a047
+)
+FetchContent_Populate(eigen3) # we do not need add_subdirectory() here since we only include the header
 
-# Include the external Eigen setup
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/executable)
-include(external/eigen3.cmake)
-
-include_directories(${CMAKE_SOURCE_DIR}/src)
-
-# Link Eigen to your executable
-target_link_libraries(MyApp PRIVATE Eigen3::Eigen)
+add_library(eigen INTERFACE)
+add_library(eigen3::eigen ALIAS eigen)
+target_include_directories(eigen INTERFACE ${eigen3_SOURCE_DIR})

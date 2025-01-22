@@ -1,56 +1,35 @@
 "D:\C++\CLion\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=D:/C++/CLion/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -DPython_EXECUTABLE=D:/Anaconda/Installation/python.exe -DPython3_EXECUTABLE=D:/Anaconda/Installation/python.exe -S D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m -B D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\cmake-build-debug
--- The C compiler identification is GNU 13.1.0
--- The CXX compiler identification is GNU 13.1.0
--- Detecting C compiler ABI info
-CMake Warning in D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-mf8tlz/CMakeLists.txt:
-  The object file directory
+CMake Warning (dev) in CMakeLists.txt:
+  No project() command is present.  The top-level CMakeLists.txt file must
+  contain a literal, direct call to the project() command.  Add a line of
+  code such as
 
-    D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-mf8tlz/CMakeFiles/cmTC_c96f7.dir/./
+    project(ProjectName)
 
-  has 228 characters.  The maximum full path to an object file is 250
-  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+  near the top of the file, but after cmake_minimum_required().
 
-    CMakeCCompilerABI.c.obj
+  CMake is pretending there is a "project(Project)" command on the first
+  line.
+This warning is for project developers.  Use -Wno-dev to suppress it.
 
-  cannot be safely placed under this directory.  The build may not work
-  correctly.
+CMake Warning (dev) in CMakeLists.txt:
+  cmake_minimum_required() should be called prior to this top-level project()
+  call.  Please see the cmake-commands(7) manual for usage documentation of
+  both commands.
+This warning is for project developers.  Use -Wno-dev to suppress it.
 
-
--- Detecting C compiler ABI info - done
--- Check for working C compiler: D:/C++/CLion/CLion 2024.2.2/bin/mingw/bin/gcc.exe - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Detecting CXX compiler ABI info
-CMake Warning in D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-n22nwc/CMakeLists.txt:
-  The object file directory
-
-    D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-n22nwc/CMakeFiles/cmTC_ae5a4.dir/./
-
-  has 228 characters.  The maximum full path to an object file is 250
-  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
-
-    CMakeCXXCompilerABI.cpp.obj
-
-  cannot be safely placed under this directory.  The build may not work
-  correctly.
-
-
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: D:/C++/CLion/CLion 2024.2.2/bin/mingw/bin/g++.exe - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
-CMake Error at external/eigen3.cmake:3 (include):
-  include could not find requested file:
-
-    Fetch_content
-Call Stack (most recent call first):
-  CMakeLists.txt:6 (include)
-
-
-CMake Error at external/eigen3.cmake:5 (FetchContent_Declare):
+CMake Error at CMakeLists.txt:1 (FetchContent_Declare):
   Unknown CMake command "FetchContent_Declare".
-Call Stack (most recent call first):
-  CMakeLists.txt:6 (include)
 
+
+CMake Warning (dev) in CMakeLists.txt:
+  No cmake_minimum_required command is present.  A line of code such as
+
+    cmake_minimum_required(VERSION 3.30)
+
+  should be added at the top of the file.  The version specified may be lower
+  if you wish to support older CMake versions for this project.  For more
+  information run "cmake --help-policy CMP0000".
+This warning is for project developers.  Use -Wno-dev to suppress it.
 
 -- Configuring incomplete, errors occurred!
