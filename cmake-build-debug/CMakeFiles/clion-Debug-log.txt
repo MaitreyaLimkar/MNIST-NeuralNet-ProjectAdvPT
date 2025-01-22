@@ -1,0 +1,56 @@
+"D:\C++\CLion\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=D:/C++/CLion/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -DPython_EXECUTABLE=D:/Anaconda/Installation/python.exe -DPython3_EXECUTABLE=D:/Anaconda/Installation/python.exe -S D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m -B D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\cmake-build-debug
+-- The C compiler identification is GNU 13.1.0
+-- The CXX compiler identification is GNU 13.1.0
+-- Detecting C compiler ABI info
+CMake Warning in D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-mf8tlz/CMakeLists.txt:
+  The object file directory
+
+    D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-mf8tlz/CMakeFiles/cmTC_c96f7.dir/./
+
+  has 228 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CMakeCCompilerABI.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: D:/C++/CLion/CLion 2024.2.2/bin/mingw/bin/gcc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+CMake Warning in D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-n22nwc/CMakeLists.txt:
+  The object file directory
+
+    D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-n22nwc/CMakeFiles/cmTC_ae5a4.dir/./
+
+  has 228 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    CMakeCXXCompilerABI.cpp.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: D:/C++/CLion/CLion 2024.2.2/bin/mingw/bin/g++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Error at external/eigen3.cmake:3 (include):
+  include could not find requested file:
+
+    Fetch_content
+Call Stack (most recent call first):
+  CMakeLists.txt:6 (include)
+
+
+CMake Error at external/eigen3.cmake:5 (FetchContent_Declare):
+  Unknown CMake command "FetchContent_Declare".
+Call Stack (most recent call first):
+  CMakeLists.txt:6 (include)
+
+
+-- Configuring incomplete, errors occurred!
