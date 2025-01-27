@@ -23,8 +23,9 @@ static DSizes<Index, NumDims> RandomDims(Index min, Index max) {
 }
 
 static internal::TensorBlockShapeType RandomBlockShape() {
-  return internal::random<bool>() ? internal::TensorBlockShapeType::kUniformAllDims
-                                  : internal::TensorBlockShapeType::kSkewedInnerDims;
+  return internal::random<bool>()
+         ? internal::TensorBlockShapeType::kUniformAllDims
+         : internal::TensorBlockShapeType::kSkewedInnerDims;
 }
 
 template <int NumDims>
@@ -33,8 +34,10 @@ static size_t RandomTargetBlockSize(const DSizes<Index, NumDims>& dims) {
 }
 
 template <int Layout, int NumDims>
-static Index GetInputIndex(Index output_index, const array<Index, NumDims>& output_to_input_dim_map,
-                           const array<Index, NumDims>& input_strides, const array<Index, NumDims>& output_strides) {
+static Index GetInputIndex(Index output_index,
+                           const array<Index, NumDims>& output_to_input_dim_map,
+                           const array<Index, NumDims>& input_strides,
+                           const array<Index, NumDims>& output_strides) {
   int input_index = 0;
   if (Layout == ColMajor) {
     for (int i = NumDims - 1; i > 0; --i) {
@@ -42,14 +45,16 @@ static Index GetInputIndex(Index output_index, const array<Index, NumDims>& outp
       input_index += idx * input_strides[output_to_input_dim_map[i]];
       output_index -= idx * output_strides[i];
     }
-    return input_index + output_index * input_strides[output_to_input_dim_map[0]];
+    return input_index +
+           output_index * input_strides[output_to_input_dim_map[0]];
   } else {
     for (int i = 0; i < NumDims - 1; ++i) {
       const Index idx = output_index / output_strides[i];
       input_index += idx * input_strides[output_to_input_dim_map[i]];
       output_index -= idx * output_strides[i];
     }
-    return input_index + output_index * input_strides[output_to_input_dim_map[NumDims - 1]];
+    return input_index +
+           output_index * input_strides[output_to_input_dim_map[NumDims - 1]];
   }
 }
 
@@ -68,8 +73,10 @@ static void test_block_io_copy_data_from_source_to_target() {
   Tensor<T, NumDims, Layout> output(dims);
 
   // Construct a tensor block mapper.
-  using TensorBlockMapper = internal::TensorBlockMapper<NumDims, Layout, Index>;
-  TensorBlockMapper block_mapper(dims, {RandomBlockShape(), RandomTargetBlockSize(dims), {0, 0, 0}});
+  using TensorBlockMapper =
+      internal::TensorBlockMapper<NumDims, Layout, Index>;
+  TensorBlockMapper block_mapper(
+      dims, {RandomBlockShape(), RandomTargetBlockSize(dims), {0, 0, 0}});
 
   // We will copy data from input to output through this buffer.
   Tensor<T, NumDims, Layout> block(block_mapper.blockDimensions());
@@ -137,9 +144,12 @@ static void test_block_io_copy_using_reordered_dimensions() {
 
   // Construct a tensor block mapper.
   // NOTE: Tensor block mapper works with shuffled dimensions.
-  using TensorBlockMapper = internal::TensorBlockMapper<NumDims, Layout, Index>;
+  using TensorBlockMapper =
+      internal::TensorBlockMapper<NumDims, Layout, Index>;
   TensorBlockMapper block_mapper(output_tensor_dims,
-                                 {RandomBlockShape(), RandomTargetBlockSize(output_tensor_dims), {0, 0, 0}});
+                                 {RandomBlockShape(),
+                                  RandomTargetBlockSize(output_tensor_dims),
+                                  {0, 0, 0}});
 
   // We will copy data from input to output through this buffer.
   Tensor<T, NumDims, Layout> block(block_mapper.blockDimensions());
@@ -155,8 +165,9 @@ static void test_block_io_copy_using_reordered_dimensions() {
   for (Index i = 0; i < block_mapper.blockCount(); ++i) {
     auto desc = block_mapper.blockDescriptor(i);
 
-    const Index first_coeff_index =
-        GetInputIndex<Layout, NumDims>(desc.offset(), output_to_input_dim_map, input_strides, output_strides);
+    const Index first_coeff_index = GetInputIndex<Layout, NumDims>(
+        desc.offset(), output_to_input_dim_map, input_strides,
+        output_strides);
 
     // NOTE: Block dimensions are in the same order as output dimensions.
 
@@ -174,7 +185,8 @@ static void test_block_io_copy_using_reordered_dimensions() {
 
       // TODO(ezhulenev): Remove when fully switched to TensorBlock.
       DSizes<int, NumDims> dim_map;
-      for (int j = 0; j < NumDims; ++j) dim_map[j] = static_cast<int>(output_to_input_dim_map[j]);
+      for (int j = 0; j < NumDims; ++j)
+        dim_map[j] = static_cast<int>(output_to_input_dim_map[j]);
       TensorBlockIO::Copy(dst, src, /*dst_to_src_dim_map=*/dim_map);
     }
 
@@ -191,7 +203,8 @@ static void test_block_io_copy_using_reordered_dimensions() {
 
       // TODO(ezhulenev): Remove when fully switched to TensorBlock.
       DSizes<int, NumDims> dim_map;
-      for (int j = 0; j < NumDims; ++j) dim_map[j] = static_cast<int>(input_to_output_dim_map[j]);
+      for (int j = 0; j < NumDims; ++j)
+        dim_map[j] = static_cast<int>(input_to_output_dim_map[j]);
       TensorBlockIO::Copy(dst, src, /*dst_to_src_dim_map=*/dim_map);
     }
   }
@@ -403,13 +416,13 @@ static void test_block_io_squeeze_ones() {
   CALL_SUBTEST((NAME<float, 2, ColMajor>())); \
   CALL_SUBTEST((NAME<float, 4, ColMajor>())); \
   CALL_SUBTEST((NAME<float, 5, ColMajor>())); \
-  CALL_SUBTEST((NAME<bool, 1, RowMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 2, RowMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 4, RowMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 5, RowMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 1, ColMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 2, ColMajor>()));  \
-  CALL_SUBTEST((NAME<bool, 4, ColMajor>()));  \
+  CALL_SUBTEST((NAME<bool, 1, RowMajor>())); \
+  CALL_SUBTEST((NAME<bool, 2, RowMajor>())); \
+  CALL_SUBTEST((NAME<bool, 4, RowMajor>())); \
+  CALL_SUBTEST((NAME<bool, 5, RowMajor>())); \
+  CALL_SUBTEST((NAME<bool, 1, ColMajor>())); \
+  CALL_SUBTEST((NAME<bool, 2, ColMajor>())); \
+  CALL_SUBTEST((NAME<bool, 4, ColMajor>())); \
   CALL_SUBTEST((NAME<bool, 5, ColMajor>()))
 
 EIGEN_DECLARE_TEST(cxx11_tensor_block_io) {

@@ -13,8 +13,9 @@
 
 BTL_MAIN;
 
-int main() {
-  bench<Action_matrix_matrix_product<tensor_interface<REAL_TYPE> > >(MIN_MM, MAX_MM, NB_POINT);
+int main()
+{
+  bench<Action_matrix_matrix_product<tensor_interface<REAL_TYPE> > >(MIN_MM,MAX_MM,NB_POINT);
 
   return 0;
 }

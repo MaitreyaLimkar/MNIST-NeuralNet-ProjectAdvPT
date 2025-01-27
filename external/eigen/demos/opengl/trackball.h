@@ -14,28 +14,29 @@
 
 class Camera;
 
-class Trackball {
- public:
-  enum Mode { Around, Local };
+class Trackball
+{
+  public:
 
-  Trackball() : mpCamera(0) {}
+    enum Mode {Around, Local};
 
-  void start(Mode m = Around) {
-    mMode = m;
-    mLastPointOk = false;
-  }
+    Trackball() : mpCamera(0) {}
 
-  void setCamera(Camera* pCam) { mpCamera = pCam; }
+    void start(Mode m = Around) { mMode = m; mLastPointOk = false; }
 
-  void track(const Eigen::Vector2i& newPoint2D);
+    void setCamera(Camera* pCam) { mpCamera = pCam; }
 
- protected:
-  bool mapToSphere(const Eigen::Vector2i& p2, Eigen::Vector3f& v3);
+    void track(const Eigen::Vector2i& newPoint2D);
 
-  Camera* mpCamera;
-  Eigen::Vector3f mLastPoint3D;
-  Mode mMode;
-  bool mLastPointOk;
+  protected:
+
+    bool mapToSphere( const Eigen::Vector2i& p2, Eigen::Vector3f& v3);
+
+    Camera* mpCamera;
+    Eigen::Vector3f mLastPoint3D;
+    Mode mMode;
+    bool mLastPointOk;
+
 };
 
-#endif  // EIGEN_TRACKBALL_H
+#endif // EIGEN_TRACKBALL_H

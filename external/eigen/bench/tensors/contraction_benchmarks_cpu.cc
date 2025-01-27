@@ -4,9 +4,10 @@
 
 #include "tensor_benchmarks.h"
 
-#define CREATE_THREAD_POOL(threads) \
-  Eigen::ThreadPool pool(threads);  \
-  Eigen::ThreadPoolDevice device(&pool, threads);
+#define CREATE_THREAD_POOL(threads)             \
+Eigen::ThreadPool pool(threads);                \
+Eigen::ThreadPoolDevice device(&pool, threads);
+
 
 // Contractions for number of threads ranging from 1 to 32
 // Dimensions are Rows, Cols, Depth
@@ -18,6 +19,7 @@
     suite.contraction(iters);                                                 \
   }                                                                           \
   BENCHMARK_RANGE(BM_##Contraction##_##D1##x##D2##x##D3, 1, 32);
+
 
 // Vector Matrix and Matrix Vector products
 BM_ContractionCPU(1, 2000, 500);

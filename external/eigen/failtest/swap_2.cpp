@@ -2,7 +2,8 @@
 
 using namespace Eigen;
 
-int main() {
+int main()
+{
   VectorXf a(10), b(10);
   VectorXf const &ac(a);
 #ifdef EIGEN_SHOULD_FAIL_TO_BUILD

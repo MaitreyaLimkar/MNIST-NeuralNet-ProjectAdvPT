@@ -8,6 +8,7 @@
 
 using namespace Eigen;
 
-int main() {
-  ColPivHouseholderQR<Matrix<SCALAR, Dynamic, Dynamic> > qr(Matrix<SCALAR, Dynamic, Dynamic>::Random(10, 10));
+int main()
+{
+  ColPivHouseholderQR<Matrix<SCALAR,Dynamic,Dynamic> > qr(Matrix<SCALAR,Dynamic,Dynamic>::Random(10,10));
 }
