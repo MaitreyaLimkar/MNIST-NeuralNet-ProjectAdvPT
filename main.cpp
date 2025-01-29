@@ -3,36 +3,34 @@
 //
 
 #include <iostream>
-#include <string>
+#include <cstdlib>
 #include "readImageMNIST.hpp"
 
 int main(int argc, char* argv[]) {
-    // Validate command-line arguments
     if (argc != 4) {
-        std::cerr << "Usage: " << argv[0]
-                  << " <image_dataset_input> <image_tensor_output> <image_index>" << std::endl;
-        return 1;
+        std::cerr << "Usage: " << argv[0] << " <image_dataset_input> <image_tensor_output> <image_index>" << std::endl;
+        return EXIT_FAILURE;
     }
 
-    // Parse command-line arguments
-    std::string input_path = argv[1];
-    std::string output_path = argv[2];
+    std::string image_dataset_input = argv[1];
+    std::string image_tensor_output = argv[2];
     int image_index = std::stoi(argv[3]);
 
-    // Read the specified MNIST image using the namespace function
-    Eigen::Tensor<double, 2> mnist_image =
-        MNISTReader::readMNISTImage(input_path, image_index);
+    // Read the image data
+    std::vector<uint8_t> image_data = readMNISTImages(image_dataset_input, image_index);
 
-    // Check if image was successfully read
-    if (mnist_image.size() > 0) {
-        // Write the tensor to output file using namespace function
-        MNISTReader::writeTensorToFile(mnist_image, output_path);
-        std::cout << "Successfully processed MNIST image at index "
-                  << image_index << std::endl;
-    } else {
-        std::cerr << "Failed to read MNIST image." << std::endl;
-        return 1;
+    // Convert the image to an Eigen tensor (double precision)
+    Eigen::Tensor<double, 2> tensor(28, 28);
+    for (int i = 0; i < 28; ++i) {
+        for (int j = 0; j < 28; ++j) {
+            tensor(i, j) = static_cast<double>(image_data[i * 28 + j]) / 255.0; // Normalize [0,1]
+        }
     }
 
-    return 0;
+    // Write tensor to output file
+    writeTensorToFile(tensor, image_tensor_output);
+
+    std::cout << "Image at index " << image_index << " successfully saved to " << image_tensor_output << std::endl;
+
+    return EXIT_SUCCESS;
 }
