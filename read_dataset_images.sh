@@ -1,1 +1,2 @@
-echo "This script should read a dataset image into a tensor and pretty-print it into a text file..."
+#!/bin/bash
+./cmake-build-debug/MNIST_NN "$1" "$2" "$3"

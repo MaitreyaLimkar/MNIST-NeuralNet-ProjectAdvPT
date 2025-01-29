@@ -1,2 +1,3 @@
 # TODO: extend list with suitable entries, e.g. `.vscode`
 cmake-build-debug
+/output_tensor.txt
