@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <string>
+#include <fstream>
 
 // Namespace to avoid potential naming conflicts
 namespace MNISTReader {

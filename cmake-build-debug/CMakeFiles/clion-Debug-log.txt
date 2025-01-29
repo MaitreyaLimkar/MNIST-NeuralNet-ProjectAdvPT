@@ -1,4 +1,4 @@
 "D:\C++\CLion\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=D:/C++/CLion/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -DPython_EXECUTABLE=D:/Anaconda/Installation/python.exe -DPython3_EXECUTABLE=D:/Anaconda/Installation/python.exe -S D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m -B D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\cmake-build-debug
--- Configuring done (0.2s)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
 -- Build files have been written to: D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug
