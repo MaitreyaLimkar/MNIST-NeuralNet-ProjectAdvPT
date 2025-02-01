@@ -16,6 +16,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${EIGEN3_INCLUDE_DIR}
 )
 
+set_target_properties(MNIST_NN PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
+)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(external/eigen)
 add_subdirectory(implementation)

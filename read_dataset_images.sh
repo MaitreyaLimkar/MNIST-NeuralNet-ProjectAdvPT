@@ -1,2 +1,2 @@
 #!/bin/bash
-./cmake-build-debug/MNIST_NN "$1" "$2" "$3"
+./bin/MNIST_NN "mnist-datasets/train-images.idx3-ubyte" "output_tensor.txt" "0"
