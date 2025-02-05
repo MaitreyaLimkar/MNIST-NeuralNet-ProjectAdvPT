@@ -8,8 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(EIGEN3_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/eigen/Eigen")
 
 add_executable(MNIST_NN main.cpp
-        implementation/readImageMNIST/readImageMNIST.cpp
+        implementation/readerMNIST/readImageMNIST.cpp
         src/readImageMNIST.hpp
+        src/readLabelMNIST.hpp
+        implementation/readerMNIST/readLabelMNIST.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

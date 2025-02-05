@@ -555,13 +555,13 @@ mnist_data_recognition_IS_TOP_LEVEL:STATIC=ON
 mnist_data_recognition_SOURCE_DIR:STATIC=D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m
 
 //Value Computed by CMake
-readImageMNIST_BINARY_DIR:STATIC=D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/implementation/readImageMNIST
+readImageMNIST_BINARY_DIR:STATIC=D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/cmake-build-debug/implementation/readerMNIST
 
 //Value Computed by CMake
 readImageMNIST_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-readImageMNIST_SOURCE_DIR:STATIC=D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/implementation/readImageMNIST
+readImageMNIST_SOURCE_DIR:STATIC=D:/Maitreya_Docs/Education/MS_in_Deutschland/FAU-Erlangen/Comp_Eng/Studies/3_WiSe_2024-25/AdvPT/WiSe-2024-25/Exercises/ws2024-group-10-2k1m/implementation/readerMNIST
 
 
 ########################

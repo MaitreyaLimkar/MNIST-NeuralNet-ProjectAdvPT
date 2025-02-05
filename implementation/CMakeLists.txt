@@ -1,1 +1,1 @@
-add_subdirectory(readImageMNIST)
+add_subdirectory(readerMNIST)
