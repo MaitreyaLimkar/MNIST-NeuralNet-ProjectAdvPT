@@ -1,2 +1,4 @@
 # TODO: extend list with suitable entries, e.g. `.vscode`
-/.idea/
+cmake-build-debug
+/output_tensor.txt
+/.idea/ws2024-group-10-2k1m.iml
