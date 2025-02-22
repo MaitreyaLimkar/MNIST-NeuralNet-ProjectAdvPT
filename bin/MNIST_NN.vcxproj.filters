@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\implementation\readerMNIST\readImageMNIST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\implementation\readerMNIST\readLabelMNIST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\src\readImageMNIST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\src\readLabelMNIST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{02AE1201-B27D-3023-9A70-F9F020D0985E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8FF081F6-6F2D-3A5A-8FAD-87DB49722BB1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

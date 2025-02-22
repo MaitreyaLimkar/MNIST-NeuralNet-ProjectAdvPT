@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Maitreya_Docs\Education\MS_in_Deutschland\FAU-Erlangen\Comp_Eng\Studies\3_WiSe_2024-25\AdvPT\WiSe-2024-25\Exercises\ws2024-group-10-2k1m\bin\CMakeFiles\3dd7dc313616d216cdd877060d47346f\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CE3BA3B3-E098-36E9-B66B-C7690EE9DA23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
