@@ -1,4 +1,7 @@
 # TODO: extend list with suitable entries, e.g. `.vscode`
 cmake-build-debug
-/output_tensor.txt
+/image_output_tensor.txt
+/label_output_tensor.txt
 /.idea/ws2024-group-10-2k1m.iml
+build
+bin

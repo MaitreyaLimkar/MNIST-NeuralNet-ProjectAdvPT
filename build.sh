@@ -1,9 +1,9 @@
 #!/bin/bash
-dldir="bin"
+dl_dir="build"
 
-[ ! -d "$dldir" ] && mkdir -p "$dldir"
+[ ! -d "$dl_dir" ] && mkdir -p "$dl_dir"
 
-cd "$dldir"
+# shellcheck disable=SC2164
+cd "$dl_dir"
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j
-

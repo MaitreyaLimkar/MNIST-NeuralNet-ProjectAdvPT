@@ -1,1 +1,3 @@
-echo "This script should read a dataset label into a tensor and pretty-print it into a text file..."
+#!/bin/bash
+#./build/readLabelMNIST "mnist-datasets/train-labels.idx1-ubyte" "label_output_tensor.txt" "0"
+./build/readLabelMNIST "$1" "$2" "$3"

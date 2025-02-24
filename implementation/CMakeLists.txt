@@ -1,1 +1,2 @@
-add_subdirectory(readerMNIST)
+add_subdirectory(readerImageMNIST)
+add_subdirectory(readerLabelMNIST)

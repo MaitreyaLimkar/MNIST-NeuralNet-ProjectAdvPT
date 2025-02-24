@@ -1,0 +1,6 @@
+project(readImageMNIST)
+add_executable(${PROJECT_NAME} readImageMNIST.cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PRIVATE eigen)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wno-unused-parameter -Wno-unused-variable -pg -g)
+target_link_options(${PROJECT_NAME} PRIVATE -pg)
