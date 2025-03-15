@@ -1,2 +1,3 @@
 add_subdirectory(readerImageMNIST)
 add_subdirectory(readerLabelMNIST)
+add_subdirectory(NeuralNetworkMNIST)

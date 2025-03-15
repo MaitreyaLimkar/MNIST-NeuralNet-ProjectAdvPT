@@ -1,1 +1,3 @@
-echo "This script should trigger the training and testing of your neural network implementation..."
+# Usage: ./build/NeuralNetworkMNIST "mnist-configs/input.config"
+# Check for configuration file argument.
+./build/NeuralNetworkMNIST "$1"
