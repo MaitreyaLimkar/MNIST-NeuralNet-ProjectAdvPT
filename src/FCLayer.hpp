@@ -6,53 +6,50 @@
 #define FCLAYER_HPP
 
 #include <Eigen/Dense>
-#include <cstdlib>
 #include <cmath>
+#include "SGD.hpp"
 
 // Fully Connected Layer class
 class FCLayer
 {
     public:
-    FCLayer(int input_size, int output_size):input_size(input_size), output_size(output_size)
+    FCLayer(size_t input_size, size_t output_size):input_size(input_size), output_size(output_size)
     {
         // Calculating the Xavier factor initialization.
-        double scale = std::sqrt(6.0 / (input_size + output_size));
-        weights = Eigen::MatrixXd::Random(output_size,input_size) * scale;
-        biases = Eigen::VectorXd::Random(output_size) * scale;
+        double scale = std::sqrt(6.0 / (static_cast<double>(input_size) +
+                                            static_cast<double>(output_size)));
+        weights = Eigen::MatrixXd::Random(static_cast<Eigen::Index>(output_size),
+                                        static_cast<Eigen::Index>(input_size)) * scale;
+        biases = Eigen::VectorXd::Random(static_cast<Eigen::Index>(output_size)) * scale;
     }
-    ~FCLayer() = default;
+
+    void weight_setter(Eigen::MatrixXd &set_weights)
+    {
+        weights = set_weights;
+    }
 
     Eigen::VectorXd forward(const Eigen::VectorXd& input)
     {
-        prev_input = input;
-        prev_output = weights * input + biases;
+        prev_input.resize(input.rows(), input.cols() + 1);
+        prev_input.block(0, 0, input.rows(), input.cols()) = input;
+        prev_input.col(input.cols()) = Eigen::VectorXd::Ones(input.rows());
+        prev_output = prev_input * weights;
         return prev_output;
     }
 
-    Eigen::VectorXd backward(const Eigen::VectorXd& grad_output, double learning_rate)
+    Eigen::VectorXd backward(const Eigen::MatrixXd& error, SGD sgd)
     {
-        // Computing gradients for the weights and biases
-        Eigen::MatrixXd grad_weights = grad_output * prev_input.transpose();
-        Eigen::MatrixXd grad_biases = grad_output;
-        // Updating parameters using SGD
-        weights -= grad_weights * learning_rate;
-        biases -= grad_biases * learning_rate;
-        // Computing gradients to pass to previous layer
-        Eigen::MatrixXd grad_input = weights.transpose() * grad_output;
-        return grad_input;
+        grad_weights(weights.rows(), weights.cols());
+        grad_weights = prev_input.transpose()*error;
+        weights = sgd.update(weights, grad_weights);
+        return error*weights.transpose();
     }
-
-    // Getters for debugging
-    [[nodiscard]] const Eigen::MatrixXd& get_weights() const { return weights; }
-    [[nodiscard]] const Eigen::MatrixXd& get_biases() const { return biases; }
+    ~FCLayer() = default;
 
     private:
-    int input_size;
-    int output_size;
-    Eigen::MatrixXd weights;
-    Eigen::VectorXd biases;
-    Eigen::VectorXd prev_input;
-    Eigen::VectorXd prev_output;
+    size_t input_size, output_size;
+    Eigen::MatrixXd weights, biases, prev_input,
+                    prev_output, grad_weights;
 };
 
 #endif //FCLAYER_HPP

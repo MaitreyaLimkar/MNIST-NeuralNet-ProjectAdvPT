@@ -7,21 +7,34 @@
 
 #include <Eigen/Dense>
 
-// ReLU activation: element-wise max(0, x)
-inline Eigen::VectorXd relu(const Eigen::VectorXd& x)
+class ReLU
 {
-    return x.cwiseMax(0.0);
+private:
+
+    Eigen::MatrixXd lastInput;
+
+public:
+    ReLU();
+    ~ReLU();
+
+    Eigen::MatrixXd forward(const Eigen::MatrixXd &);
+    Eigen::MatrixXd backward(const Eigen::MatrixXd &);
+};
+inline ReLU::ReLU()= default;
+inline ReLU::~ReLU()= default;
+
+inline Eigen::MatrixXd ReLU::forward(const Eigen::MatrixXd& input)
+{
+    lastInput = input;
+    Eigen::MatrixXd output = input.cwiseMax(0.0);
+    return output;
 }
 
-// ReLU derivative: 1 if x > 0, else 0
-inline Eigen::VectorXd reluDerivative(const Eigen::VectorXd& x)
+inline Eigen::MatrixXd ReLU::backward(const Eigen::MatrixXd& error)
 {
-    Eigen::VectorXd dx = x;
-    for (int i = 0; i < dx.size(); ++i)
-    {
-        dx(i) = (x(i) > 0) ? 1.0 : 0;
-    }
-    return dx;
+    Eigen::MatrixXd mask = (lastInput.array() >= 0.0).cast<double>();
+    Eigen::MatrixXd output = error.block(0,0,lastInput.rows(),lastInput.cols()).array() * mask.array();
+    return output;
 }
 
 #endif //RELU_HPP
