@@ -16,40 +16,43 @@ class FCLayer
     FCLayer(size_t input_size, size_t output_size):input_size(input_size), output_size(output_size)
     {
         // Calculating the Xavier factor initialization.
-        double scale = std::sqrt(6.0 / (static_cast<double>(input_size) +
-                                            static_cast<double>(output_size)));
-        weights = Eigen::MatrixXd::Random(static_cast<Eigen::Index>(output_size),
-                                        static_cast<Eigen::Index>(input_size)) * scale;
-        biases = Eigen::VectorXd::Random(static_cast<Eigen::Index>(output_size)) * scale;
+        double limit = std::sqrt(6.0 / (input_size + output_size));
+        weights = Eigen::MatrixXd::Random(input_size, output_size) * limit;
+        biases = Eigen::VectorXd::Zero(output_size);
     }
 
-    void weight_setter(Eigen::MatrixXd &set_weights)
+    void weight_setter(const Eigen::MatrixXd &set_weights)
     {
         weights = set_weights;
+    }
+    void bias_setter(const Eigen::VectorXd &set_biases)
+    {
+        biases = set_biases;
     }
 
     Eigen::VectorXd forward(const Eigen::VectorXd& input)
     {
-        prev_input.resize(input.rows(), input.cols() + 1);
-        prev_input.block(0, 0, input.rows(), input.cols()) = input;
-        prev_input.col(input.cols()) = Eigen::VectorXd::Ones(input.rows());
-        prev_output = prev_input * weights;
+        prev_input = input;  // Save input for use in backpropagation.
+        prev_output = weights * input + biases;
         return prev_output;
     }
 
-    Eigen::VectorXd backward(const Eigen::MatrixXd& error, SGD sgd)
+    Eigen::VectorXd backward(const Eigen::VectorXd& error, const SGD &sgd)
     {
-        grad_weights(weights.rows(), weights.cols());
-        grad_weights = prev_input.transpose()*error;
-        weights = sgd.update(weights, grad_weights);
-        return error*weights.transpose();
+        Eigen::MatrixXd grad_weights = error * prev_input.transpose();
+        const Eigen::VectorXd& grad_biases = error;
+        weights = sgd.update_weights(weights, grad_weights);
+        biases = sgd.update_biases(biases, grad_biases);
+
+        // Propagate error to previous layer: dL/d(input) = weights^T * error.
+        return weights.transpose() * error;
     }
     ~FCLayer() = default;
 
     private:
     size_t input_size, output_size;
-    Eigen::MatrixXd weights, biases, prev_input,
-                    prev_output, grad_weights;
+    Eigen::MatrixXd weights;
+    Eigen::VectorXd biases, prev_input, prev_output;
 };
 
 #endif //FCLAYER_HPP
