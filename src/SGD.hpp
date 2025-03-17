@@ -12,29 +12,24 @@ private:
     double lr; // Learning rate
 
 public:
-    // Default constructor with standard learning rate
-    SGD() : lr(0.001) {}
-
-    // Constructor with custom learning rate
-    explicit SGD(double learning_rate) : lr(learning_rate) {}
-
-    // Virtual destructor for proper inheritance
-    virtual ~SGD() = default;
-
-    // Weight update method
-    Eigen::MatrixXd update_weights(const Eigen::MatrixXd& weights, const Eigen::MatrixXd& gradient) const {
-        return weights - lr * gradient;
-    }
-
-    // Getter for learning rate
-    double getLearningRate() const {
-        return lr;
-    }
-
-    // Setter for learning rate
-    void setLearningRate(double learning_rate) {
-        lr = learning_rate;
-    }
+    SGD();
+    explicit SGD(double);
+    ~SGD() = default;
+    [[nodiscard]] Eigen::MatrixXd update_weights(const Eigen::MatrixXd &, const Eigen::MatrixXd &) const;
 };
+
+inline SGD::SGD(){
+    this->lr = 0.001;
+}
+
+inline SGD::SGD(const double lr){
+    this->lr = lr;
+}
+
+
+
+inline Eigen::MatrixXd SGD::update_weights(const Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient) const{
+    return (weights - lr * gradient);
+}
 
 #endif //SGD_HPP

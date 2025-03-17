@@ -2,11 +2,11 @@
 // Created by Maitreya Limkar on 15-03-2025.
 //
 
-#ifndef NEURALNETWORK_HPP
-#define NEURALNETWORK_HPP
+#pragma once
 
 #include <iostream>
 #include <utility>
+#include <omp.h>  // Added OpenMP header
 #include "FCLayer.hpp"
 #include "ReLU.hpp"
 #include "Softmax.hpp"
@@ -66,7 +66,6 @@ inline NeuralNetwork::NeuralNetwork(double learning_rate,
     this->test_images_path = std::move(test_images_path);
     this->test_labels_path = std::move(test_labels_path);
     this->prediction_log_file_path = std::move(prediction_log_file_path);
-
     sgd = SGD(learning_rate);
     fc1 = FCLayer(input_size, hidden_size);
     fc2 = FCLayer(hidden_size, 10);
@@ -83,14 +82,14 @@ inline Eigen::MatrixXd NeuralNetwork::forward(const Eigen::MatrixXd &input)
     // Second layer: Fully Connected (hidden -> output)
     Eigen::MatrixXd fc2_forward = fc2.forward(relu_forward);
     // Apply softmax to get probabilities.
-    Eigen::MatrixXd softmax_forward = Softmax::forward(fc2_forward);
+    Eigen::MatrixXd softmax_forward = softmax.forward(fc2_forward);
     return softmax_forward;
 }
 
 inline Eigen::MatrixXd NeuralNetwork::backward(const Eigen::MatrixXd &error)
 {
     // Backward pass through softmax.
-    Eigen::MatrixXd softmax_backward = Softmax::backward(error);
+    Eigen::MatrixXd softmax_backward = softmax.backward(error);
     // Backward pass through second FC layer, using SGD optimizer.
     Eigen::MatrixXd fc2_backward = fc2.backward(softmax_backward, sgd);
     // Backward pass through ReLU.
@@ -100,6 +99,7 @@ inline Eigen::MatrixXd NeuralNetwork::backward(const Eigen::MatrixXd &error)
     return fc1_backward;
 }
 
+// Parallelizing batch processing using 4 threads
 inline void NeuralNetwork::train()
 {
     // Load training images and labels.
@@ -107,20 +107,23 @@ inline void NeuralNetwork::train()
     train_images.readImageData(train_images_path);
     DatasetLabels train_labels(batch_size);
     train_labels.readLabelData(train_labels_path);
-
     // For each epoch.
     for (int epoch = 0; epoch < num_epochs; epoch++)
     {
         // For each batch in training data.
-        for (size_t batch = 0; batch < train_images.getNoOfBatches(); batch++)
+        #pragma omp parallel for num_threads(4)
+        for (int batch = 0; batch < static_cast<int>(train_images.getNoOfBatches()); batch++)
         {
-            // Forward pass on current batch.
+            // Each thread processes different batches in parallel
             Eigen::MatrixXd predicted_output = forward(train_images.getBatch(batch));
-            // Compute loss using cross-entropy.
             double loss = ce_loss.forward(predicted_output, train_labels.getBatch(batch));
-            // Backpropagate: compute gradient of loss and update parameters.
             Eigen::MatrixXd loss_backward = ce_loss.backward(train_labels.getBatch(batch));
-            backward(loss_backward);
+
+            // Critical section to avoid race conditions when updating model parameters
+            #pragma omp critical
+            {
+                backward(loss_backward);
+            }
         }
     }
 }
@@ -140,22 +143,27 @@ inline void NeuralNetwork::test()
     }
 
     // For each batch in the test data.
-    for (size_t j = 0; j < test_images.getNoOfBatches(); j++)
+    #pragma omp parallel for num_threads(4) ordered
+    for (int j = 0; j < static_cast<int>(test_images.getNoOfBatches()); j++)
     {
-        predictionLogFile << "Current batch: " << j << std::endl;
-        // For each image in the batch.
         Eigen::MatrixXd batchOutput = forward(test_images.getBatch(j));
-        for (int i = 0; i < batchOutput.rows(); i++)
+
+        // Use ordered directive to maintain the same output order as the original
+        #pragma omp ordered
         {
-            Eigen::Index predLabel;
-            batchOutput.row(i).maxCoeff(&predLabel);
-            Eigen::Index actualLabel;
-            test_labels.getBatch(j).row(i).maxCoeff(&actualLabel);
-            predictionLogFile << " - image " << j * batch_size + i
-                              << ": Prediction=" << predLabel
-                              << ". Label=" << actualLabel << std::endl;
+            predictionLogFile << "Current batch: " << j << std::endl;
+            // For each image in the batch.
+            for (int i = 0; i < batchOutput.rows(); i++)
+            {
+                Eigen::Index predLabel;
+                batchOutput.row(i).maxCoeff(&predLabel);
+                Eigen::Index actualLabel;
+                test_labels.getBatch(j).row(i).maxCoeff(&actualLabel);
+                predictionLogFile << " - image " << j * batch_size + i
+                                << ": Prediction=" << predLabel
+                                << ". Label=" << actualLabel << std::endl;
+            }
         }
     }
     predictionLogFile.close();
 }
-#endif //NEURALNETWORK_HPP

@@ -26,7 +26,7 @@ public:
         weights = set_weights;
     }
 
-    Eigen::MatrixXd forward(Eigen::MatrixXd input) {
+    Eigen::MatrixXd forward(const Eigen::MatrixXd& input) {
         prev_input = Eigen::MatrixXd(input.rows(), input.cols()+1);
         auto ones = Eigen::MatrixXd::Constant(input.rows(), 1, 1.0);
         prev_input << input, ones;

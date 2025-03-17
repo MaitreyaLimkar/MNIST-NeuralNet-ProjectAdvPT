@@ -10,21 +10,34 @@
 // Softmax activation function for numerical stability
 class Softmax {
 public:
-    // Forward pass: compute softmax for each row in the input matrix.
-    static Eigen::MatrixXd forward(const Eigen::MatrixXd &input) {
-        Eigen::MatrixXd output(input.rows(), input.cols());
-        for (int i = 0; i < input.rows(); i++) {
-            double maxVal = input.row(i).maxCoeff();
-            Eigen::RowVectorXd exps = (input.row(i).array() - maxVal).exp();
-            double sumExps = exps.sum();
-            output.row(i) = exps / sumExps;
-        }
-        return output;
-    }
-    // Backward pass: if using softmax with cross-entropy, the gradient is typically computed as (softmax - target).
-    // Here we simply return the error tensor unchanged.
-    static Eigen::MatrixXd backward(const Eigen::MatrixXd &errorTensor) {
-        return errorTensor;
-    }
+    Softmax();
+    ~Softmax();
+    Eigen::MatrixXd forward(const Eigen::MatrixXd &);
+    Eigen::MatrixXd backward(const Eigen::MatrixXd &);
+
+private:
+    Eigen::MatrixXd lastInput;
+    Eigen::MatrixXd lastOutput;
 };
+
+inline Softmax::Softmax() = default;
+inline Softmax::~Softmax() = default;
+
+inline Eigen::MatrixXd Softmax::forward(const Eigen::MatrixXd &inputTensor)
+{
+    lastInput = inputTensor;
+    auto shifted = inputTensor.colwise() - inputTensor.rowwise().maxCoeff();
+    Eigen::MatrixXd expTensor = shifted.array().exp();
+    lastOutput = expTensor.array().colwise() / expTensor.array().rowwise().sum();
+    return lastOutput;
+}
+
+inline Eigen::MatrixXd Softmax::backward(const Eigen::MatrixXd &errorTensor)
+{
+    Eigen::MatrixXd weightedErrorSum = (errorTensor.array() * lastOutput.array()).rowwise().sum();
+    Eigen::MatrixXd adjustedError = errorTensor.array() - (weightedErrorSum.replicate(1, errorTensor.cols())).array();
+    Eigen::MatrixXd gradInput = lastOutput.array() * adjustedError.array();
+    return gradInput;
+}
+
 #endif //SOFTMAX_HPP
