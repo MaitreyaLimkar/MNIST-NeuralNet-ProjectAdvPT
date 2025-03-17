@@ -55,19 +55,22 @@ inline NeuralNetwork::NeuralNetwork(double learning_rate,
                                     std::string train_labels_path,
                                     std::string test_images_path,
                                     std::string test_labels_path,
-                                    std::string prediction_log_file_path)
-    : learning_rate(learning_rate),
-      num_epochs(num_epochs),
-      batch_size(batch_size),
-      hidden_size(hidden_size),
-      fc1(input_size, hidden_size),
-      fc2(hidden_size, 10),
-      sgd(learning_rate),
-      train_images_path(std::move(train_images_path)),
-      train_labels_path(std::move(train_labels_path)),
-      test_images_path(std::move(test_images_path)),
-      test_labels_path(std::move(test_labels_path)),
-      prediction_log_file_path(std::move(prediction_log_file_path)){}
+                                    std::string prediction_log_file_path): fc1(input_size, hidden_size), fc2(hidden_size, 10)
+{
+    this->learning_rate = learning_rate;
+    this->num_epochs = num_epochs;
+    this->batch_size = batch_size;
+    this->hidden_size = hidden_size;
+    this->train_images_path = std::move(train_images_path);
+    this->train_labels_path = std::move(train_labels_path);
+    this->test_images_path = std::move(test_images_path);
+    this->test_labels_path = std::move(test_labels_path);
+    this->prediction_log_file_path = std::move(prediction_log_file_path);
+
+    sgd = SGD(learning_rate);
+    fc1 = FCLayer(input_size, hidden_size);
+    fc2 = FCLayer(hidden_size, 10);
+}
 
 inline NeuralNetwork::~NeuralNetwork() = default;
 
@@ -114,7 +117,7 @@ inline void NeuralNetwork::train()
             // Forward pass on current batch.
             Eigen::MatrixXd predicted_output = forward(train_images.getBatch(batch));
             // Compute loss using cross-entropy.
-            //double loss = celoss.forward(predicted_output, train_labels.getBatch(batch));
+            double loss = ce_loss.forward(predicted_output, train_labels.getBatch(batch));
             // Backpropagate: compute gradient of loss and update parameters.
             Eigen::MatrixXd loss_backward = ce_loss.backward(train_labels.getBatch(batch));
             backward(loss_backward);
