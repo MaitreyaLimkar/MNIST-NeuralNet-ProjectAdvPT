@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <utility>
-#include <omp.h>  // Added OpenMP header
+//#include <omp.h>  // Added OpenMP header
 #include "FCLayer.hpp"
 #include "ReLU.hpp"
 #include "Softmax.hpp"
@@ -82,11 +82,11 @@ private:
     train_labels.readLabelData(train_labels_path);
         size_t numBatches = train_images.getNoOfBatches();
     // For each epoch.
-    #pragma omp parallel for num_threads(6) ordered
+    //#pragma omp parallel for num_threads(6) ordered
     for (int epoch = 0; epoch < num_epochs; epoch++)
     {
         // For each batch in training data.
-        #pragma omp parallel for num_threads(6)
+        //#pragma omp parallel for num_threads(6)
         for (size_t batch = 0; numBatches; batch++)
         {
             Eigen::MatrixXd batchImages = train_images.getBatch(batch);
@@ -96,7 +96,7 @@ private:
             double loss = ce_loss.forward(predicted_output, train_labels.getBatch(batch));
             Eigen::MatrixXd loss_backward = ce_loss.backward(train_labels.getBatch(batch));
             backward(loss_backward);
-            std::cout<<" - Batch: "<< batch <<". Loss: "<< loss << std::endl;
+            //std::cout<<" - Batch: "<< batch <<". Loss: "<< loss << std::endl;
         }
     }
     }
@@ -116,13 +116,13 @@ private:
     }
 
     // For each batch in the test data.
-       #pragma omp parallel for num_threads(6) ordered
+       //#pragma omp parallel for num_threads(6) ordered
         for (size_t j = 1; j < test_images.getNoOfBatches(); j++)
         {
             Eigen::MatrixXd batchOutput = forward(test_images.getBatch(j));
 
             // Use ordered directive to maintain the same output order as the original
-            #pragma omp ordered
+           // #pragma omp ordered
             // For each image in the batch.
             for (int i = 1; i < batchOutput.rows(); i++)
             {
