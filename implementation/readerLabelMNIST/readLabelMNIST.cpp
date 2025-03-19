@@ -6,8 +6,7 @@
 #include <string>
 #include "readLabelMNIST.hpp"
 
-int main(int arg, char** argv)
-{
+int main(int arg, char** argv){
     // Assigning command-line arguments to variables
     const std::string input_filepath = argv[1];
     const std::string output_filepath = argv[2];
@@ -18,6 +17,5 @@ int main(int arg, char** argv)
     labels.readLabelData(input_filepath);
     // Writing specified label to output file
     labels.writeLabelToFile(output_filepath, index);
-    // Returning 0 to indicate successful execution
     return 0;
 }

@@ -15,7 +15,7 @@ public:
     SGD();
     explicit SGD(double);
     ~SGD() = default;
-    [[nodiscard]] Eigen::MatrixXd update_weights(const Eigen::MatrixXd &, const Eigen::MatrixXd &) const;
+    Eigen::MatrixXd update_weights(const Eigen::MatrixXd &, const Eigen::MatrixXd &);
 };
 
 inline SGD::SGD(){
@@ -26,9 +26,7 @@ inline SGD::SGD(const double lr){
     this->lr = lr;
 }
 
-
-
-inline Eigen::MatrixXd SGD::update_weights(const Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient) const{
+inline Eigen::MatrixXd SGD::update_weights(const Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient){
     return (weights - lr * gradient);
 }
 

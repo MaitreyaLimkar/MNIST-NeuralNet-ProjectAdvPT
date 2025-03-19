@@ -16,9 +16,9 @@ class DatasetLabels
 {
 private:
     // Declaring private member variables
-    size_t batch_size_;
-    size_t number_of_labels_;
-    std::vector<Eigen::MatrixXd> batches_;
+    size_t batch_size;
+    size_t number_of_labels;
+    std::vector<Eigen::MatrixXd> batches;
 
 public:
     // Declaring constructor and destructor
@@ -28,21 +28,23 @@ public:
     // Declaring public member functions
     void readLabelData(const std::string &);
     void writeLabelToFile(const std::string &, size_t);
-    [[nodiscard]] Eigen::MatrixXd getBatch(size_t) const;
+    Eigen::MatrixXd getBatch(size_t) const;
+    size_t getNumBatches() const { return batches.size(); }
 };
 
 // Initializing constructor with batch size
-inline DatasetLabels::DatasetLabels(size_t batch_size) : batch_size_(batch_size), number_of_labels_(0) {}
+inline DatasetLabels::DatasetLabels(size_t batch_size) :
+batch_size(batch_size), number_of_labels(0) {}
 
 // Returning a batch matrix at the given index
 inline Eigen::MatrixXd DatasetLabels::getBatch(size_t index) const
 {
     // Checking if index is out of range
-    if (index >= batches_.size())
+    if (index >= batches.size())
     {
         throw std::out_of_range("Batch index out of range");
     }
-    return batches_[index];
+    return batches[index];
 }
 
 // Reading MNIST label data and storing it in batches
@@ -59,7 +61,6 @@ inline void DatasetLabels::readLabelData(const std::string &input_filepath)
 
     // Declaring variables for reading header information
     char bin_data[4];
-
     // Reading and reversing magic number
     int magic_number;
     input_file.read(bin_data, 4);
@@ -67,38 +68,35 @@ inline void DatasetLabels::readLabelData(const std::string &input_filepath)
     std::memcpy(&magic_number, bin_data, sizeof(int));
 
     // Reading and reversing number of labels
+    int number_of_labels = 0;
     input_file.read(bin_data, 4);
     std::reverse(bin_data, bin_data + 4);
-    std::memcpy(&number_of_labels_, bin_data, sizeof(int));
+    std::memcpy(&number_of_labels, bin_data, sizeof(int));
 
     // Initializing label matrix for one-hot encoding
-    Eigen::MatrixXd label_matrix(batch_size_, 10);
+    Eigen::MatrixXd label_matrix(batch_size, 10);
     label_matrix.setZero();
-
+    size_t batch_filler = 0;
     // Looping through each label
-    for (size_t i = 0; i < number_of_labels_; i++)
+    for (size_t i = 0; i < number_of_labels; i++)
     {
         // Reading one label
-        uint8_t byte;
-        input_file.read(reinterpret_cast<char *>(&byte), sizeof(byte));
+        uint8_t byte = 0;
+        input_file.read(reinterpret_cast<char *>(&byte), 1);
 
         // Converting label to one-hot encoding
-        const int label = static_cast<int>(byte);
-        label_matrix(i % batch_size_, label) = 1;
-
+        const int label = byte;
+        label_matrix(batch_filler, label) = 1.0;
+        batch_filler++;
         // Storing batch when full
-        if ((i + 1) % batch_size_ == 0)
+        if (batch_filler == batch_size || i == number_of_labels - 1)
         {
-            batches_.push_back(label_matrix);
+            size_t valid_rows = batch_filler;
+            batches.emplace_back(label_matrix.topRows(valid_rows));
             label_matrix.setZero();
-        }
-        // Handling last batch correctly
-        else if (i == number_of_labels_ - 1)
-        {
-            batches_.emplace_back(label_matrix.topRows(i % batch_size_ + 1));
+            batch_filler = 0;
         }
     }
-
     input_file.close();
 }
 
@@ -106,11 +104,11 @@ inline void DatasetLabels::readLabelData(const std::string &input_filepath)
 inline void DatasetLabels::writeLabelToFile(const std::string &output_filepath, size_t index)
 {
     // Calculating batch and image index
-    size_t batch_no = index / batch_size_;
-    size_t image_index = index % batch_size_;
+    size_t batch_no = index / batch_size;
+    size_t image_index = index % batch_size;
 
     // Checking if batch index is out of range
-    if (batch_no >= batches_.size())
+    if (batch_no >= batches.size())
     {
         std::cerr << "Error: Batch index out of range" << std::endl;
         return;
@@ -129,9 +127,9 @@ inline void DatasetLabels::writeLabelToFile(const std::string &output_filepath, 
     output_file << 10 << "\n"; // One-hot encoding size
 
     // Writing label data
-    for (size_t i = 0; i < 10; ++i)
+    for (int j = 0; j < 10; j++)
     {
-        output_file << batches_[batch_no](image_index, i) << "\n";
+        output_file << batches[batch_no](image_index, j) << "\n";
     }
     output_file.close();
 }

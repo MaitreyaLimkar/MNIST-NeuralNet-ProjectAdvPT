@@ -7,7 +7,8 @@
 
 #include <Eigen/Dense>
 #include <cmath>
-#define EPS 1e-10
+
+#define EPSILON 1e-10
 
 class CrossEntropyLoss {
 private:
@@ -25,13 +26,15 @@ inline CrossEntropyLoss::~CrossEntropyLoss() = default;
 inline double CrossEntropyLoss::forward(const Eigen::MatrixXd &inputTensor, const Eigen::MatrixXd &labelTensor)
 {
     lastPrediction = inputTensor;
-    return -((labelTensor.array() * (inputTensor.array().log())).sum());
+    double loss = -(labelTensor.array() * (inputTensor.array() + EPSILON).log()).sum();
+    loss /= static_cast<double>(inputTensor.rows());
+    return loss;
 }
 
 inline Eigen::MatrixXd CrossEntropyLoss::backward(const Eigen::MatrixXd &labelTensor)
 {
     // target output/predicted output
-    auto output = -(labelTensor.array() / lastPrediction.array());
+    auto output = (lastPrediction - labelTensor) / static_cast<double>(lastPrediction.rows());
     return output;
 }
 #endif //LOSS_HPP
