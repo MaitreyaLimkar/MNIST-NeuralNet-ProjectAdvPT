@@ -5,3 +5,4 @@ cmake-build-debug
 /.idea/ws2024-group-10-2k1m.iml
 build
 bin
+/log_predictions.txt

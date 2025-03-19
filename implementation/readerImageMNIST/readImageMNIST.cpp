@@ -12,7 +12,7 @@ int main(int arg, char** argv){
     const std::string output_filepath = argv[2];
     const size_t index = std::stoi(argv[3]);
     // Creating DataSetImages object with batch size
-    DataSetImages data(500);
+    DataSetImages data(5000);
     // Reading image data from input file
     data.readImageData(input_filepath);
     // Writing specified image to output file

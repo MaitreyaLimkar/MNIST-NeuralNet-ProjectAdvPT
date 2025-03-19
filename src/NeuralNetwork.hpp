@@ -1,133 +1,193 @@
-//
-// Created by Maitreya Limkar on 15-03-2025.
-//
-
 #pragma once
 
 #include <iostream>
-#include "FCLayer.hpp"
-#include "ReLU.hpp"
-#include "Softmax.hpp"
+#include <fstream>
+#include <Eigen/Dense>
+#include <numeric>
+#include <algorithm>
+#include <random>
+#include <chrono>
+
 #include "Loss.hpp"
 #include "SGD.hpp"
+#include "ReLU.hpp"      // Ensure the case matches the actual filename (e.g., "relu.hpp")
+#include "softmax.hpp"
+#include "FCLayer.hpp"
 #include "readImageMNIST.hpp"
 #include "readLabelMNIST.hpp"
 
 class NeuralNetwork
 {
 private:
-    double learning_rate;
-    int num_epochs, batch_size,
-        hidden_size, input_size = 784;
-    FCLayer fc1; // Layer from input to hidden
-    FCLayer fc2; // Layer from hidden to output
+    double learningRate;
+    int numEpochs;
+    int batchSize;
+    int hiddenLayerSize;
+    int inputSize = 784; // MNIST images (28x28)
+
+    // Layers
+    FullyConnected fc1;  // [784 -> hiddenLayerSize]
+    FullyConnected fc2;  // [hiddenLayerSize -> 10]
+
     ReLU relu;
     Softmax softmax;
-    CrossEntropyLoss ce_loss;
+    CrossEntropyLoss celoss;
     SGD sgd;
-    std::string train_images_path, train_labels_path,
-    test_images_path, test_labels_path, prediction_log_file_path;
 
-    public:
-    NeuralNetwork(double lr, int numEpoch, int batches, int hidden_size,
-    std::string train_image_path, std::string train_label_path, std::string test_image_path,
-    std::string test_label_path, std::string log_path):
-    learning_rate(lr), num_epochs(numEpoch), batch_size(batches), hidden_size(hidden_size),
-    train_images_path(train_image_path), train_labels_path(train_label_path), test_images_path(test_image_path),
-    test_labels_path(test_label_path), prediction_log_file_path(log_path)
-    {
-        sgd = SGD(learning_rate);
-        fc1 = FCLayer(input_size, hidden_size);
-        fc2 = FCLayer(hidden_size, 10);
-    }
-    ~NeuralNetwork() {}
+    // File paths for data
+    std::string trainDataPath;
+    std::string trainLabelsPath;
+    std::string testDataPath;
+    std::string testLabelsPath;
+    std::string predictionLogFilePath;
 
-    // Performs a forward pass on the input tensor.
-    Eigen::MatrixXd forward(const Eigen::MatrixXd &input)
+public:
+    NeuralNetwork(double lr,
+                  int nEpochs,
+                  int bSize,
+                  int hLayerSize,
+                  std::string tDataPath,
+                  std::string tLabelsPath,
+                  std::string tstDataPath,
+                  std::string tstLabelsPath,
+                  std::string predLogPath)
+        : learningRate(lr), numEpochs(nEpochs), batchSize(bSize), hiddenLayerSize(hLayerSize),
+          trainDataPath(tDataPath), trainLabelsPath(tLabelsPath),
+          testDataPath(tstDataPath), testLabelsPath(tstLabelsPath),
+          predictionLogFilePath(predLogPath), sgd(lr)
     {
-        // First layer: Fully Connected (input -> hidden)
-        Eigen::MatrixXd fc1_forward = fc1.forward(input);
-        // Apply ReLU activation.
-        Eigen::MatrixXd relu_forward = relu.forward(fc1_forward);
-        // Second layer: Fully Connected (hidden -> output)
-        Eigen::MatrixXd fc2_forward = fc2.forward(relu_forward);
-        // Apply softmax to get probabilities.
-        Eigen::MatrixXd softmax_forward = softmax.forward(fc2_forward);
-        return softmax_forward;
-    };
-
-    // Performs a backward pass with the given error tensor.
-    Eigen::MatrixXd backward(const Eigen::MatrixXd &error)
-    {
-        // Backward pass through softmax.
-        Eigen::MatrixXd softmax_backward = softmax.backward(error);
-        // Backward pass through second FC layer, using SGD optimizer.
-        Eigen::MatrixXd fc2_backward = fc2.backward(softmax_backward, sgd);
-        // Backward pass through ReLU.
-        Eigen::MatrixXd relu_backward = relu.backward(fc2_backward);
-        // Backward pass through first FC layer.
-        Eigen::MatrixXd fc1_backward = fc1.backward(relu_backward, sgd);
-        return fc1_backward;
+        // Initialize FullyConnected layers with He initialization
+        fc1 = FullyConnected(inputSize, hiddenLayerSize);
+        fc2 = FullyConnected(hiddenLayerSize, 10);
     }
 
-    // Tests the network on the test data and writes predictions to a log file.
+    ~NeuralNetwork() {
+        // Cleanup if necessary.
+    }
+
+    // Forward pass through FC1 -> ReLU -> FC2 -> Softmax.
+    // Input: [batch_size x 784], Output: [batch_size x 10]
+    Eigen::MatrixXd forward(const Eigen::MatrixXd &inputTensor)
+    {
+        Eigen::MatrixXd out_fc1 = fc1.forward(inputTensor);
+        Eigen::MatrixXd out_relu = relu.forward(out_fc1);
+        Eigen::MatrixXd out_fc2 = fc2.forward(out_relu);
+        Eigen::MatrixXd out_softmax = softmax.forward(out_fc2);
+        return out_softmax;
+    }
+
+    // Backward pass: Propagate the loss gradient through FC2, ReLU, then FC1.
+    // dLoss is assumed to be (yhat - y)/N, shape [batch_size x 10]
+    Eigen::MatrixXd backward(const Eigen::MatrixXd &dLoss)
+    {
+        Eigen::MatrixXd grad_fc2 = fc2.backward(dLoss, sgd);
+        Eigen::MatrixXd grad_relu = relu.backward(grad_fc2);
+        Eigen::MatrixXd grad_fc1 = fc1.backward(grad_relu, sgd);
+        return grad_fc1;
+    }
+
+    // Training routine: Loads training data and labels, then performs forward/backward passes.
     void train()
     {
-    // Load training images and labels.
-    DataSetImages train_images(batch_size);
-    train_images.readImageData(train_images_path);
-    DatasetLabels train_labels(batch_size);
-    train_labels.readLabelData(train_labels_path);
-        size_t numBatches = train_images.getNoOfBatches();
-    // For each epoch.
-    for (int epoch = 0; epoch < num_epochs; epoch++)
-    {
-        // For each batch in training data.
-        for (size_t batch = 0; numBatches; batch++)
+        auto start_time = std::chrono::steady_clock::now();
+        const double time_limit_seconds = 20.0 * 60.0; // 20 minutes
+
+        DataSetImages trainData(batchSize);
+        trainData.readImageData(trainDataPath);
+
+        DatasetLabels trainLabels(batchSize);
+        trainLabels.readLabelData(trainLabelsPath);
+
+        size_t numBatches = trainData.getNoOfBatches();
+
+        for (int epoch = 0; epoch < numEpochs; epoch++)
         {
-            Eigen::MatrixXd batchImages = train_images.getBatch(batch);
-            Eigen::MatrixXd batchLabels = train_labels.getBatch(batch);
-            // Each thread processes different batches in parallel
-            Eigen::MatrixXd predicted_output = forward(train_images.getBatch(batch));
-            double loss = ce_loss.forward(predicted_output, train_labels.getBatch(batch));
-            Eigen::MatrixXd loss_backward = ce_loss.backward(train_labels.getBatch(batch));
-            backward(loss_backward);
+            std::cout << "Epoch " << epoch << " / " << numEpochs << std::endl;
+
+            // Optionally, shuffle batches to improve generalization.
+            std::vector<size_t> batchIndices(numBatches);
+            std::iota(batchIndices.begin(), batchIndices.end(), 0);
+            std::shuffle(batchIndices.begin(), batchIndices.end(), std::default_random_engine(epoch));
+
+            for (size_t idx = 0; idx < numBatches; idx++)
+            {
+                size_t b = batchIndices[idx];
+
+                Eigen::MatrixXd batchImages = trainData.getBatch(b);   // [miniBatchSize x 784]
+                Eigen::MatrixXd batchLabels = trainLabels.getBatch(b);   // [miniBatchSize x 10]
+
+                Eigen::MatrixXd predictions = forward(batchImages);
+                double lossVal = celoss.forward(predictions, batchLabels);
+                //std::cout << "  Batch " << b << " loss: " << lossVal << std::endl;
+
+                Eigen::MatrixXd dLoss = celoss.backward(batchLabels);
+                backward(dLoss);
+
+                // Check elapsed time after each batch
+                auto current_time = std::chrono::steady_clock::now();
+                std::chrono::duration<double> elapsed = current_time - start_time;
+                if (elapsed.count() >= time_limit_seconds)
+                {
+                    std::cout << "Time limit reached (" << elapsed.count() << " seconds). Stopping training early." << std::endl;
+                    return; // or break out of outer loop if you prefer
+                }
+            }
         }
-    }
+
+        auto end_time = std::chrono::steady_clock::now();
+        std::chrono::duration<double> total_training_time = end_time - start_time;
+        std::cout << "Total training time: " << total_training_time.count() << " seconds" << std::endl;
     }
 
+    // Testing routine: Loads test data and labels, logs predictions, and computes accuracy.
     void test()
     {
-    // Load testing images and labels.
-    DataSetImages test_images(batch_size);
-    test_images.readImageData(test_images_path);
-    DatasetLabels test_labels(batch_size);
-    test_labels.readLabelData(test_labels_path);
-    std::ofstream predictionLogFile(prediction_log_file_path);
-    if (!predictionLogFile.is_open())
-    {
-        std::cerr << "Error: Cannot open prediction log file: " << prediction_log_file_path << std::endl;
-        return;
-    }
+        DataSetImages testDataObj(batchSize);
+        testDataObj.readImageData(testDataPath);
 
-    // For each batch in the test data.
-        for (size_t j = 1; j < test_images.getNoOfBatches(); j++)
+        DatasetLabels testLabelsObj(batchSize);
+        testLabelsObj.readLabelData(testLabelsPath);
+
+        std::ofstream predictionLogFile(predictionLogFilePath);
+        if (!predictionLogFile.is_open())
         {
-            Eigen::MatrixXd batchOutput = forward(test_images.getBatch(j));
+            std::cerr << "Error: Cannot open prediction log file: " << predictionLogFilePath << std::endl;
+            return;
+        }
 
-            // Use ordered directive to maintain the same output order as the original
-            // For each image in the batch.
-            for (int i = 1; i < batchOutput.rows(); i++)
+        size_t numTestBatches = testDataObj.getNoOfBatches();
+        int totalSamples = 0;
+        int correctPredictions = 0;
+
+
+        for (size_t b = 0; b < numTestBatches; b++)
+        {
+            predictionLogFile << "Current batch: " << b << "\n";
+            Eigen::MatrixXd batchImages = testDataObj.getBatch(b);
+            Eigen::MatrixXd predictions = forward(batchImages);
+            Eigen::MatrixXd batchLabels = testLabelsObj.getBatch(b);
+            #pragma opm parallel for
+            for (int i = 0; i < predictions.rows(); i++)
             {
-                Eigen::Index pred_label;
-                batchOutput.row(i).maxCoeff(&pred_label);
+                Eigen::Index predLabel;
+                predictions.row(i).maxCoeff(&predLabel);
+
                 Eigen::Index actualLabel;
-                test_labels.getBatch(j).row(i).maxCoeff(&actualLabel);
-                predictionLogFile << " - image " << j * batch_size + i
-                                << ": Prediction=" << pred_label
-                                << ". Label=" << actualLabel << std::endl;
+                batchLabels.row(i).maxCoeff(&actualLabel);
+
+                predictionLogFile << " - image " << (b * batchSize + i)
+                                  << ": Prediction=" << predLabel
+                                  << ". Label=" << actualLabel << "\n";
+
+                totalSamples++;
+                if (predLabel == actualLabel)
+                    correctPredictions++;
             }
         }
         predictionLogFile.close();
+
+        double accuracy = 100.0 * correctPredictions / totalSamples;
+        std::cout << "Test accuracy: " << accuracy << "%" << std::endl;
     }
 };
+

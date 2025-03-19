@@ -1,176 +1,137 @@
-//
-// Created by Maitreya Limkar on 25-01-2025.
-//
-
-#ifndef MNIST_IMAGE_READER_HPP
-#define MNIST_IMAGE_READER_HPP
+#pragma once
 
 #include <iostream>
+#include <memory>
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 #include <Eigen/Dense>
 
 class DataSetImages
 {
 private:
-    size_t batch_size;
-    size_t number_of_images;
-    size_t number_of_rows;
-    size_t number_of_columns;
-    std::vector<Eigen::MatrixXd> batches;
+    size_t batch_size_;
+    size_t number_of_images_;
+    size_t number_of_rows_;
+    size_t number_of_columns_;
+    std::vector<Eigen::MatrixXd> batches_;
 
 public:
-    // Declaring constructor and destructor
     explicit DataSetImages(size_t batch_size);
     ~DataSetImages();
 
-    // Declaring public member functions
     void readImageData(const std::string &filepath);
     void writeImageToFile(const std::string &filepath, size_t index);
     Eigen::MatrixXd getBatch(size_t index);
     size_t getNoOfBatches();
 };
 
-// Initializing constructor with batch size
-inline DataSetImages::DataSetImages(size_t batch_size) :
-    batch_size(batch_size), number_of_images(0),
-    number_of_rows(0), number_of_columns(0) {}
+DataSetImages::DataSetImages(size_t batch_size)
+    : batch_size_(batch_size), number_of_images_(0), number_of_rows_(0), number_of_columns_(0)
+{}
 
 DataSetImages::~DataSetImages() {}
 
-// Returning a batch matrix at the given index
-inline Eigen::MatrixXd DataSetImages::getBatch(size_t index)
+Eigen::MatrixXd DataSetImages::getBatch(size_t index)
 {
-    return batches[index];
+    return batches_[index];
 }
 
-// Returning the total number of batches
-inline size_t DataSetImages::getNoOfBatches()
+size_t DataSetImages::getNoOfBatches()
 {
-    return batches.size();
+    return batches_.size();
 }
 
-// Reading MNIST image data and storing it in batches
-inline void DataSetImages::readImageData(const std::string& input_filepath)
+void DataSetImages::readImageData(const std::string &input_filepath)
 {
-    // Opening input file in binary mode
     std::ifstream input_file(input_filepath, std::ios::binary);
-    // Checking if file is open
-    if (!input_file.is_open())
-    {
-        std::cerr << "Error: Unable to open file: " << input_filepath << std::endl;
+    if(!input_file.is_open()) {
+        std::cerr << "Unable to open file: " << input_filepath << std::endl;
         return;
     }
 
-    // Declaring variables for reading header information
     char bin_data[4];
-
-    // Reading and reversing magic number
+    // Read magic number
     input_file.read(bin_data, 4);
     std::reverse(bin_data, bin_data + 4);
     int magic_number = 0;
     std::memcpy(&magic_number, bin_data, sizeof(int));
 
-    // Reading and reversing number of images
+    // Read number of images
     input_file.read(bin_data, 4);
     std::reverse(bin_data, bin_data + 4);
-    int number_of_images_ = 0;
-    std::memcpy(&number_of_images_, bin_data, sizeof(int));
-    number_of_images = number_of_images_;
+    int number_of_images = 0;
+    std::memcpy(&number_of_images, bin_data, sizeof(int));
+    number_of_images_ = number_of_images;
 
-    // Reading and reversing number of rows
+    // Read number of rows
     input_file.read(bin_data, 4);
     std::reverse(bin_data, bin_data + 4);
-    int number_of_rows_ = 0;
-    std::memcpy(&number_of_rows_, bin_data, sizeof(int));
-    number_of_rows = number_of_rows_;
+    int number_of_rows = 0;
+    std::memcpy(&number_of_rows, bin_data, sizeof(int));
+    number_of_rows_ = number_of_rows;
 
-    // Reading and reversing number of columns
+    // Read number of columns
     input_file.read(bin_data, 4);
     std::reverse(bin_data, bin_data + 4);
-    int number_of_columns_ = 0;
-    std::memcpy(&number_of_columns_, bin_data, sizeof(int));
-    number_of_columns = number_of_columns_;
+    int number_of_columns = 0;
+    std::memcpy(&number_of_columns, bin_data, sizeof(int));
+    number_of_columns_ = number_of_columns;
 
-    // Calculating image size and batch-related values
-    size_t image_size = number_of_rows * number_of_columns;
-    size_t images_in_last_batch = number_of_images % batch_size;
+    size_t image_size = number_of_rows_ * number_of_columns_;
+    size_t images_in_last_batch = number_of_images_ % batch_size_;
+
     unsigned char *image_bin = new unsigned char[image_size];
     double *image_doubles = new double[image_size];
 
-    Eigen::MatrixXd image_matrix(batch_size, image_size);
-    size_t batch_filler = 0;
+    Eigen::MatrixXd image_matrix(batch_size_, image_size);
+    size_t batchFillCount = 0;
 
-    // Looping through each image
-    for (size_t i = 0; i < number_of_images; i++)
+    for(size_t i = 0; i < number_of_images_; i++)
     {
-        // Reading one image
         input_file.read(reinterpret_cast<char*>(image_bin), image_size);
-
-        // Normalizing pixel values to [0, 1]
         std::transform(image_bin, image_bin + image_size, image_doubles,
-                       [](unsigned char c) { return static_cast<double>(c) / 255.0; });
+                       [](unsigned char c){ return static_cast<double>(c) / 255.0; });
+        image_matrix.row(batchFillCount) = Eigen::Map<Eigen::VectorXd>(image_doubles, image_size);
+        batchFillCount++;
 
-        // Converting image to Eigen row vector
-        image_matrix.row(batch_filler) = Eigen::Map<Eigen::VectorXd>(image_doubles, image_size);
-        batch_filler++;
-
-        // Storing batch when full
-        if (batch_filler == batch_size || i == number_of_images - 1)
+        if(batchFillCount == batch_size_ || (i == number_of_images_ - 1))
         {
-            size_t valid_rows = batch_filler;
-            batches.emplace_back(image_matrix.topRows(valid_rows));
-            batch_filler = 0;
+            size_t validRows = batchFillCount;
+            batches_.push_back(image_matrix.topRows(validRows));
+            batchFillCount = 0;
         }
     }
+
     delete[] image_bin;
     delete[] image_doubles;
     input_file.close();
 }
 
-// Writing an image to an output file
-inline void DataSetImages::writeImageToFile(const std::string& output_filepath, size_t index)
+void DataSetImages::writeImageToFile(const std::string &output_filepath, size_t index)
 {
-    // Calculating batch and image index
-    size_t batch_no = index / batch_size;
-    size_t image_index = index % batch_size;
+    size_t batch_no = index / batch_size_;
+    size_t row_in_batch = index % batch_size_;
 
-    // Checking if image index is out of range
-    if (index >= number_of_images)
-    {
-        std::cerr << "Error: Image index out of range" << std::endl;
+    if(batch_no >= batches_.size() || row_in_batch >= batches_[batch_no].rows()) {
+        std::cerr << "Index out of range." << std::endl;
         return;
     }
 
-    // Checking if batch index is out of range
-    if (batch_no >= batches.size())
-    {
-        std::cerr << "Error: Image Batch index out of range" << std::endl;
-        return;
-    }
-
-    // Opening output file for writing
     std::ofstream output_file(output_filepath);
-    // Checking if file is open
-    if (!output_file.is_open())
-    {
+    if(!output_file.is_open()) {
         std::cerr << "Error: Unable to open file for writing: " << output_filepath << std::endl;
         return;
     }
 
-    // Writing metadata
-    output_file << "2\n"; // Tensor rank
-    output_file << number_of_rows << "\n";
-    output_file << number_of_columns << "\n";
+    output_file << 2 << "\n"; // rank
+    output_file << number_of_rows_ << "\n";
+    output_file << number_of_columns_ << "\n";
 
-    // Writing image pixel values
-    size_t image_size = number_of_rows * number_of_columns;
-    for (size_t k = 0; k < image_size; k++)
-    {
-        output_file << batches[batch_no](image_index, k) << "\n";
+    size_t image_size = number_of_rows_ * number_of_columns_;
+    for(size_t i = 0; i < image_size; i++) {
+        output_file << batches_[batch_no](row_in_batch, i) << "\n";
     }
     output_file.close();
 }
-
-#endif // MNIST_IMAGE_READER_HPP

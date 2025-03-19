@@ -1,33 +1,44 @@
-//
-// Created by Maitreya Limkar on 15-03-2025.
-//
-
-#ifndef SGD_HPP
-#define SGD_HPP
+#pragma once
 
 #include <Eigen/Dense>
+#include <random>
+#include <cmath>
 
+// Simple SGD optimizer.
 class SGD {
 private:
-    double lr; // Learning rate
-
+    double learningRate;
 public:
     SGD();
-    explicit SGD(double);
-    ~SGD() = default;
-    Eigen::MatrixXd update_weights(const Eigen::MatrixXd &, const Eigen::MatrixXd &);
+    explicit SGD(double lr);
+    ~SGD();
+
+    // Updates weights: returns weights - learningRate * gradient.
+    Eigen::MatrixXd updateWeights(Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient);
 };
 
-inline SGD::SGD(){
-    this->lr = 0.001;
+SGD::SGD() : learningRate(0.001) {}
+
+SGD::SGD(double lr) : learningRate(lr) {}
+
+SGD::~SGD() {}
+
+Eigen::MatrixXd SGD::updateWeights(Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient) {
+    return weights - learningRate * gradient;
 }
 
-inline SGD::SGD(const double lr){
-    this->lr = lr;
+// He (Kaiming) uniform initialization utility.
+// outDim: number of output neurons; inDim: number of input neurons.
+inline Eigen::MatrixXd heUniformInit(int outDim, int inDim, unsigned int seed = 1337)
+{
+    static std::mt19937 rng(seed);
+    double limit = std::sqrt(6.0 / double(inDim));
+    std::uniform_real_distribution<double> dist(-limit, limit);
+    Eigen::MatrixXd W(outDim, inDim);
+    for (int r = 0; r < outDim; ++r) {
+        for (int c = 0; c < inDim; ++c) {
+            W(r, c) = dist(rng);
+        }
+    }
+    return W;
 }
-
-inline Eigen::MatrixXd SGD::update_weights(const Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient){
-    return (weights - lr * gradient);
-}
-
-#endif //SGD_HPP
