@@ -96,7 +96,6 @@ private:
             double loss = ce_loss.forward(predicted_output, train_labels.getBatch(batch));
             Eigen::MatrixXd loss_backward = ce_loss.backward(train_labels.getBatch(batch));
             backward(loss_backward);
-            std::cout<<" - Batch: "<< batch <<". Loss: "<< loss << std::endl;
         }
     }
     }

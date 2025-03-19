@@ -1,43 +1,43 @@
-//
-// Created by Maitreya Limkar on 15-03-2025.
-//
-
-#ifndef SOFTMAX_HPP
-#define SOFTMAX_HPP
+#pragma once
 
 #include <Eigen/Dense>
 
-// Softmax activation function for numerical stability
-class Softmax {
+class Softmax
+{
+private:
+    Eigen::MatrixXd inputTensorCache; // Logits
+    Eigen::MatrixXd yHat;             // Softmax outputs
 public:
     Softmax();
     ~Softmax();
-    Eigen::MatrixXd forward(const Eigen::MatrixXd &);
-    Eigen::MatrixXd backward(const Eigen::MatrixXd &);
 
-private:
-    Eigen::MatrixXd lastInput;
-    Eigen::MatrixXd lastOutput;
+    Eigen::MatrixXd forward(const Eigen::MatrixXd &inputTensor);
+    Eigen::MatrixXd backward(const Eigen::MatrixXd &errorTensor); // (Optional; may not be used if loss returns gradient)
 };
 
-inline Softmax::Softmax() = default;
-inline Softmax::~Softmax() = default;
+Softmax::Softmax() {}
+Softmax::~Softmax() {}
 
-inline Eigen::MatrixXd Softmax::forward(const Eigen::MatrixXd &inputTensor)
+Eigen::MatrixXd Softmax::forward(const Eigen::MatrixXd &inputTensor)
 {
-    lastInput = inputTensor;
-    auto shifted = inputTensor.colwise() - inputTensor.rowwise().maxCoeff();
+    inputTensorCache = inputTensor;
+    // Subtract max per row for numerical stability.
+    // rowMax is an (m x 1) vector; subtracting it column-wise works properly.
+    Eigen::VectorXd rowMax = inputTensor.rowwise().maxCoeff();
+    Eigen::MatrixXd shifted = inputTensor.array().colwise() - rowMax.array();
+
     Eigen::MatrixXd expTensor = shifted.array().exp();
-    lastOutput = expTensor.array().colwise() / expTensor.array().rowwise().sum();
-    return lastOutput;
+    Eigen::VectorXd rowSum = expTensor.rowwise().sum();
+    // Divide each element by the sum of its row (using colwise division).
+    yHat = (expTensor.array().colwise() / rowSum.array()).matrix();
+    return yHat;
 }
 
-inline Eigen::MatrixXd Softmax::backward(const Eigen::MatrixXd &errorTensor)
+Eigen::MatrixXd Softmax::backward(const Eigen::MatrixXd &errorTensor)
 {
-    Eigen::MatrixXd weightedErrorSum = (errorTensor.array() * lastOutput.array()).rowwise().sum();
-    Eigen::MatrixXd adjustedError = errorTensor.array() - (weightedErrorSum.replicate(1, errorTensor.cols())).array();
-    Eigen::MatrixXd gradInput = lastOutput.array() * adjustedError.array();
-    return gradInput;
+    // Not used if combined with loss.
+    Eigen::VectorXd weightedErrorSum = (errorTensor.array() * yHat.array()).rowwise().sum();
+    Eigen::MatrixXd sumMatrix = weightedErrorSum.replicate(1, errorTensor.cols());
+    Eigen::MatrixXd adjustedError = errorTensor.array() - sumMatrix.array();
+    return yHat.array() * adjustedError.array();
 }
-
-#endif //SOFTMAX_HPP
