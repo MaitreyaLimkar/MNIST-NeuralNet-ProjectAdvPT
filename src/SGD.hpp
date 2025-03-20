@@ -1,5 +1,5 @@
-/* ---- SGD Optimizer ---- */
 #pragma once
+/* ---- SGD Optimizer ---- */
 #include <Eigen/Dense>
 #include <random>
 #include <cmath>
@@ -23,18 +23,17 @@ Eigen::MatrixXd SGD::update_weights(Eigen::MatrixXd &weights, const Eigen::Matri
     return weights - learningRate * gradient;
 }
 
-/* ---- Xavier (Glorot) Initialization ---- */
-inline Eigen::MatrixXd xavierUniformInit(int outDim, int inDim, unsigned int seed = 1337) {
-    static std::mt19937 rng(seed); // Initializing random number generator with provided seed
-    double limit = std::sqrt(6.0 / double(inDim + outDim));
-    // Setting up uniform distribution ranging from -limit to limit
+/* ---- He Uniform Initialization ---- */
+inline Eigen::MatrixXd heUniformInit(int outDim, int inDim, unsigned int seed = 1337)
+{
+    static std::mt19937 rng(seed);
+    double limit = std::sqrt(6.0 / double(inDim));
     std::uniform_real_distribution<double> dist(-limit, limit);
-    Eigen::MatrixXd weight(outDim, inDim);
-    for (int row = 0; row < outDim; ++row) { // Iterating over each row
-        for (int col = 0; col < inDim; ++col) { // Iterating over each column
-            // Sampling random value from distribution and assigning to matrix element
-            weight(row, col) = dist(rng);
+    Eigen::MatrixXd W(outDim, inDim);
+    for (int r = 0; r < outDim; ++r) {
+        for (int c = 0; c < inDim; ++c) {
+            W(r, c) = dist(rng);
         }
     }
-    return weight;
+    return W;
 }

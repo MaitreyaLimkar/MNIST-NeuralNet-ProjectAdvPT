@@ -6,7 +6,8 @@
 class FullyConnected {
 private:
     Eigen::MatrixXd weights, input_tensor;
-    size_t input_size, output_size;
+    size_t input_size;
+    size_t output_size;
 
 public:
     FullyConnected() {}
@@ -14,7 +15,7 @@ public:
     // Xavier uniform initialization, and setting bias row to zero
     FullyConnected(size_t in, size_t out) : input_size(in), output_size(out) {
         weights.resize(input_size + 1, output_size);
-        weights.topRows(input_size) = xavierUniformInit(input_size, output_size);
+        weights.topRows(input_size) = heUniformInit(input_size, output_size);
         weights.row(input_size).setZero(); }
 
     void setWeights(const Eigen::MatrixXd &w) { // Setting weight matrix explicitly

@@ -66,7 +66,7 @@ void DatasetLabels::readLabelData(const std::string &input_filepath) {
 
         if(batch_filler == batch_size_temp || (i == number_of_labels_temp - 1)) {
             size_t validRows = batch_filler;
-            batches_temp.emplace_back(label_matrix.topRows(validRows));
+            batches_temp.push_back(label_matrix.topRows(validRows));
             label_matrix.setZero();
             batch_filler = 0;
         }

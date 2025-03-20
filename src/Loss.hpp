@@ -20,10 +20,10 @@ public:
     Eigen::MatrixXd backward(const Eigen::MatrixXd &);
 };
 
-inline CrossEntropyLoss::CrossEntropyLoss() = default;
-inline CrossEntropyLoss::~CrossEntropyLoss() = default;
+CrossEntropyLoss::CrossEntropyLoss() = default;
+CrossEntropyLoss::~CrossEntropyLoss() = default;
 
-inline double CrossEntropyLoss::forward(const Eigen::MatrixXd &inputTensor, const Eigen::MatrixXd &labelTensor)
+double CrossEntropyLoss::forward(const Eigen::MatrixXd &inputTensor, const Eigen::MatrixXd &labelTensor)
 {
     lastPrediction = inputTensor;
     double loss = -(labelTensor.array() * (inputTensor.array() + EPSILON).log()).sum();
@@ -31,7 +31,7 @@ inline double CrossEntropyLoss::forward(const Eigen::MatrixXd &inputTensor, cons
     return loss;
 }
 
-inline Eigen::MatrixXd CrossEntropyLoss::backward(const Eigen::MatrixXd &labelTensor)
+Eigen::MatrixXd CrossEntropyLoss::backward(const Eigen::MatrixXd &labelTensor)
 {
     // target output/predicted output
     auto output = (lastPrediction - labelTensor) / static_cast<double>(lastPrediction.rows());

@@ -19,8 +19,8 @@ private:
     double learningRate;
     int num_epochs, batch_size,
     hidden_size, input_size = 784;
-    FullyConnected fc1;  
-    FullyConnected fc2;  
+    FullyConnected fc1;
+    FullyConnected fc2;
     ReLU relu;
     Softmax softmax;
     CrossEntropyLoss celoss;
@@ -29,15 +29,25 @@ private:
     test_images_path, test_labels_path, pred_log_path;
 
 public:
-    NeuralNetwork(double lr, int num_of_epochs, int size_of_batch, int size_of_hidden,
-    std::string tr_images_path, std::string tr_labels_path, std::string tst_images_path,
-    std::string tst_labels_path, std::string pred_logfile_path)
-    : learningRate(lr), num_epochs(num_of_epochs), batch_size(size_of_batch), hidden_size(size_of_hidden),
-    train_images_path(tr_images_path), train_labels_path(tr_labels_path),
-    test_images_path(tst_images_path), test_labels_path(tst_labels_path),
-    pred_log_path(pred_logfile_path), sgd(lr) {
+    NeuralNetwork(double lr,
+                  int numEpochs,
+                  int batchSize,
+                  int hiddenSize,
+                  std::string trainImagesPath,
+                  std::string trainLabelsPath,
+                  std::string testImagesPath,
+                  std::string testLabelsPath,
+                  std::string predLogPath)
+        : learningRate(lr), num_epochs(numEpochs), batch_size(batchSize), hidden_size(hiddenSize),
+          train_images_path(trainImagesPath), train_labels_path(trainLabelsPath),
+          test_images_path(testImagesPath), test_labels_path(testLabelsPath),
+          pred_log_path(predLogPath)
+    {
+        // Initialize FullyConnected layers with He initialization
         fc1 = FullyConnected(input_size, hidden_size);
-        fc2 = FullyConnected(hidden_size, 10); }
+        fc2 = FullyConnected(hidden_size, 10);
+        sgd = SGD(lr);
+    }
     ~NeuralNetwork() {}
 
     Eigen::MatrixXd forward(const Eigen::MatrixXd &input_tensor) {
@@ -47,15 +57,16 @@ public:
         Eigen::MatrixXd out_softmax = softmax.forward(out_fc2);
         return out_softmax;
     }
-    
+
     Eigen::MatrixXd backward(const Eigen::MatrixXd &deriv_loss) {
         Eigen::MatrixXd grad_fc2 = fc2.backward(deriv_loss, sgd);
         Eigen::MatrixXd grad_relu = relu.backward(grad_fc2);
         Eigen::MatrixXd grad_fc1 = fc1.backward(grad_relu, sgd);
         return grad_fc1;
     }
-    
-    void train() {
+
+   void train()
+    {
         auto start_time = std::chrono::steady_clock::now();
         const double time_limit_seconds = 20.0 * 60.0;
         DataSetImages trainData(batch_size);
@@ -63,26 +74,29 @@ public:
         DatasetLabels trainLabels(batch_size);
         trainLabels.readLabelData(train_labels_path);
         size_t numBatches = trainData.getNoOfBatches();
-        
-        for (int epoch = 0; epoch < num_epochs; epoch++) {
+
+        for (int epoch = 0; epoch < num_epochs; epoch++)
+        {
             std::cout << "Epoch " << epoch << " / " << num_epochs << std::endl;
             std::vector<size_t> batchIndices(numBatches);
             std::iota(batchIndices.begin(), batchIndices.end(), 0);
             std::shuffle(batchIndices.begin(), batchIndices.end(), std::default_random_engine(epoch));
 
-            #pragma omp parallel for
-            for (size_t idx = 0; idx < numBatches; idx++) {
+            for (size_t idx = 0; idx < numBatches; idx++)
+            {
                 size_t b = batchIndices[idx];
-                Eigen::MatrixXd batchImages = trainData.getBatch(b);   
-                Eigen::MatrixXd batchLabels = trainLabels.getBatch(b);   
+                Eigen::MatrixXd batchImages = trainData.getBatch(b);
+                Eigen::MatrixXd batchLabels = trainLabels.getBatch(b);
                 Eigen::MatrixXd predictions = forward(batchImages);
-                Eigen::MatrixXd deriv_loss = celoss.backward(batchLabels);
-                backward(deriv_loss);
+                Eigen::MatrixXd dLoss = celoss.backward(batchLabels);
+                backward(dLoss);
                 auto current_time = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = current_time - start_time;
-                if (elapsed.count() >= time_limit_seconds) {
+                if (elapsed.count() >= time_limit_seconds)
+                {
                     std::cout << "Time limit reached (" << elapsed.count() << " seconds). Stopping training early." << std::endl;
-                    return; }
+                    return;
+                }
             }
         }
         auto end_time = std::chrono::steady_clock::now();

@@ -9,8 +9,10 @@
 
 class DataSetImages {
 private:
-    size_t batch_size_temp, number_of_images_temp;
-    size_t number_of_rows_temp, number_of_columns_temp;
+    size_t batch_size_temp;
+    size_t number_of_images_temp;
+    size_t number_of_rows_temp;
+    size_t number_of_columns_temp;
     std::vector<Eigen::MatrixXd> batches_temp;
 
 public:
