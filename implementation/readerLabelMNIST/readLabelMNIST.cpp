@@ -1,7 +1,3 @@
-//
-// Created by Maitreya Limkar on 25-01-2025.
-//
-
 #include <fstream>
 #include <string>
 #include "readLabelMNIST.hpp"

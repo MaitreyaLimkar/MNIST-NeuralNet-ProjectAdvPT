@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 #include <memory>
 #include <fstream>
@@ -8,8 +7,7 @@
 #include <cstring>
 #include <Eigen/Dense>
 
-class DataSetImages
-{
+class DataSetImages {
 private:
     size_t batch_size_;
     size_t number_of_images_;
