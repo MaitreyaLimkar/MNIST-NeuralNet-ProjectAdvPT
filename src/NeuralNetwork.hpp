@@ -11,7 +11,7 @@
 #include "Loss.hpp"
 #include "SGD.hpp"
 #include "ReLU.hpp"      // Ensure the case matches the actual filename (e.g., "relu.hpp")
-#include "softmax.hpp"
+#include "Softmax.hpp"
 #include "FCLayer.hpp"
 #include "readImageMNIST.hpp"
 #include "readLabelMNIST.hpp"
