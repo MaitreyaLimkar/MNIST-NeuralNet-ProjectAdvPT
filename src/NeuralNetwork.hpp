@@ -56,8 +56,8 @@ public:
     }
     
     void train() {
-      //  auto start_time = std::chrono::steady_clock::now();
-       // const double time_limit_seconds = 20.0 * 60.0; 
+        auto start_time = std::chrono::steady_clock::now();
+        const double time_limit_seconds = 20.0 * 60.0;
         DataSetImages trainData(batch_size);
         trainData.readImageData(train_images_path);
         DatasetLabels trainLabels(batch_size);
@@ -65,7 +65,7 @@ public:
         size_t numBatches = trainData.getNoOfBatches();
         
         for (int epoch = 0; epoch < num_epochs; epoch++) {
-           // std::cout << "Epoch " << epoch << " / " << num_epochs << std::endl;
+            std::cout << "Epoch " << epoch << " / " << num_epochs << std::endl;
             std::vector<size_t> batchIndices(numBatches);
             std::iota(batchIndices.begin(), batchIndices.end(), 0);
             std::shuffle(batchIndices.begin(), batchIndices.end(), std::default_random_engine(epoch));
@@ -77,18 +77,16 @@ public:
                 Eigen::MatrixXd predictions = forward(batchImages);
                 Eigen::MatrixXd deriv_loss = celoss.backward(batchLabels);
                 backward(deriv_loss);
-                /*auto current_time = std::chrono::steady_clock::now();
+                auto current_time = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = current_time - start_time;
-                if (elapsed.count() >= time_limit_seconds)
-                {
+                if (elapsed.count() >= time_limit_seconds) {
                     std::cout << "Time limit reached (" << elapsed.count() << " seconds). Stopping training early." << std::endl;
-                    return; // or break out of outer loop if you prefer
-                }*/
+                    return; }
             }
         }
-       // auto end_time = std::chrono::steady_clock::now();
-       // std::chrono::duration<double> total_training_time = end_time - start_time;
-       // std::cout << "Total training time: " << total_training_time.count() << " seconds" << std::endl;
+        auto end_time = std::chrono::steady_clock::now();
+        std::chrono::duration<double> total_training_time = end_time - start_time;
+        std::cout << "Total training time: " << total_training_time.count() << " seconds" << std::endl;
     }
 
     void test() {
@@ -109,9 +107,8 @@ public:
             Eigen::MatrixXd predictions = forward(batchImages);
             Eigen::MatrixXd batchLabels = testLabelsObj.getBatch(b);
             for (int i = 0; i < predictions.rows(); i++) {
-                Eigen::Index predLabel;
+                Eigen::Index predLabel, actualLabel;
                 predictions.row(i).maxCoeff(&predLabel);
-                Eigen::Index actualLabel;
                 batchLabels.row(i).maxCoeff(&actualLabel);
                 predictionLogFile << " - image " << (b * batch_size + i)
                                   << ": Prediction=" << predLabel

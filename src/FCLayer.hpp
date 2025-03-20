@@ -5,10 +5,8 @@
 
 class FullyConnected {
 private:
-    Eigen::MatrixXd weights;
-    size_t input_size;
-    size_t output_size;
-    Eigen::MatrixXd input_tensor;
+    Eigen::MatrixXd weights, input_tensor;
+    size_t input_size, output_size;
 
 public:
     FullyConnected() {}

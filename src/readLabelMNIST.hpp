@@ -55,20 +55,20 @@ void DatasetLabels::readLabelData(const std::string &input_filepath) {
     // Build batches: each batch is [batch_size_temp x 10]
     Eigen::MatrixXd label_matrix(batch_size_temp, 10);
     label_matrix.setZero();
-    size_t batchFillCount = 0;
+    size_t batch_filler = 0;
 
     for(size_t i = 0; i < number_of_labels_temp; i++) {
         uint8_t byte = 0;
         input_file.read(reinterpret_cast<char *>(&byte), 1);
         int label = static_cast<int>(byte);
-        label_matrix(batchFillCount, label) = 1.0;
-        batchFillCount++;
+        label_matrix(batch_filler, label) = 1.0;
+        batch_filler++;
 
-        if(batchFillCount == batch_size_temp || (i == number_of_labels_temp - 1)) {
-            size_t validRows = batchFillCount;
-            batches_temp.push_back(label_matrix.topRows(validRows));
+        if(batch_filler == batch_size_temp || (i == number_of_labels_temp - 1)) {
+            size_t validRows = batch_filler;
+            batches_temp.emplace_back(label_matrix.topRows(validRows));
             label_matrix.setZero();
-            batchFillCount = 0;
+            batch_filler = 0;
         }
     }
     input_file.close();
