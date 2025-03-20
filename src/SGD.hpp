@@ -28,7 +28,7 @@ inline Eigen::MatrixXd xavierUniformInit(int outDim, int inDim, unsigned int see
     static std::mt19937 rng(seed); // Initializing random number generator with provided seed
     double limit = std::sqrt(6.0 / double(inDim + outDim));
     // Setting up uniform distribution ranging from -limit to limit
-    std::uniform_real_distribution dist(-limit, limit);
+    std::uniform_real_distribution<double> dist(-limit, limit);
     Eigen::MatrixXd weight(outDim, inDim);
     for (int row = 0; row < outDim; ++row) { // Iterating over each row
         for (int col = 0; col < inDim; ++col) { // Iterating over each column

@@ -70,6 +70,7 @@ public:
             std::iota(batchIndices.begin(), batchIndices.end(), 0);
             std::shuffle(batchIndices.begin(), batchIndices.end(), std::default_random_engine(epoch));
 
+            #pragma omp parallel for
             for (size_t idx = 0; idx < numBatches; idx++) {
                 size_t b = batchIndices[idx];
                 Eigen::MatrixXd batchImages = trainData.getBatch(b);   
