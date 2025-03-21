@@ -6,32 +6,33 @@
 
 class SGD {
 private:
-    double learningRate;
+    double learning_rate = 0.001;
+
 public:
-    SGD();
+    SGD() = default;
     explicit SGD(double lr);
-    ~SGD();
-    Eigen::MatrixXd update_weights(Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient);
+    ~SGD() = default;
+
+    Eigen::MatrixXd update_weights(const Eigen::MatrixXd& weights, const Eigen::MatrixXd& gradients) const;
 };
 
-SGD::SGD() : learningRate(0.001) {} // Initializing with default value 0.001
-SGD::SGD(double lr) : learningRate(lr) {} // Initializing with provided value
-SGD::~SGD() {}
+inline SGD::SGD(double lr) : learning_rate(lr) {}
 
-Eigen::MatrixXd SGD::update_weights(Eigen::MatrixXd &weights, const Eigen::MatrixXd &gradient) {
-    // Subtracting product of learning rate and gradient from weights to update them
-    return weights - learningRate * gradient;
+inline Eigen::MatrixXd SGD::update_weights(const Eigen::MatrixXd& weights, const Eigen::MatrixXd& gradients) const {
+    // Basic SGD weight update rule: w = w - lr * grad
+    return weights - learning_rate * gradients;
 }
 
+
 /* ---- Xavier Uniform Initialization ---- */
-inline Eigen::MatrixXd XavierUniformInit(int outDim, int inDim, unsigned int seed = 1337)
-{
+inline Eigen::MatrixXd XavierUniformInit(int rows, int cols, unsigned int seed = 1337) {
     static std::mt19937 rng(seed);
-    double limit = std::sqrt(6.0 / double(inDim + outDim));
+    double limit = std::sqrt(6.0 / static_cast<double>(rows + cols));
     std::uniform_real_distribution<double> dist(-limit, limit);
-    Eigen::MatrixXd W(outDim, inDim);
-    for (int r = 0; r < outDim; ++r) {
-        for (int c = 0; c < inDim; ++c) {
+
+    Eigen::MatrixXd W(rows, cols);
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
             W(r, c) = dist(rng);
         }
     }

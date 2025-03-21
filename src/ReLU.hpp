@@ -1,6 +1,6 @@
 #ifndef RELU_HPP
 #define RELU_HPP
-
+/* ---- ReLU Activation Function ---- */
 #include <Eigen/Dense>
 
 class ReLU {
