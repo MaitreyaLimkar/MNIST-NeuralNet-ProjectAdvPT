@@ -153,7 +153,7 @@ public:
                 batch_labels.row(i).maxCoeff(&actual_label);
                 prediction_log << " - image " << (b * batch_size + i)
                                << ": Prediction=" << pred_label
-                               << ", Label=" << actual_label << "\n";
+                               << ". Label=" << actual_label << "\n";
                 total_samples++;
                 if (pred_label == actual_label) {
                     correct_predictions++;
