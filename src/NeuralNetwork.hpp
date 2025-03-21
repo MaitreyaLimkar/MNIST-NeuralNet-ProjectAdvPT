@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
-
 #include "Loss.hpp"
 #include "SGD.hpp"
 #include "ReLU.hpp"
@@ -14,7 +13,7 @@
 #include "FCLayer.hpp"
 #include "readImageMNIST.hpp"
 #include "readLabelMNIST.hpp"
-
+// Very important. Stay focused. All the best for the exam.
 class NeuralNetwork
 {
 private:
