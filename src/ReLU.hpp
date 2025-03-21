@@ -1,31 +1,30 @@
 #ifndef RELU_HPP
 #define RELU_HPP
+
 #include <Eigen/Dense>
 
 class ReLU {
 private:
-    Eigen::MatrixXd lastInput;
+    Eigen::MatrixXd input_cache;  // Stores input for use in backward pass
 
 public:
-    ReLU();
-    ~ReLU();
-    Eigen::MatrixXd forward(const Eigen::MatrixXd &);
-    Eigen::MatrixXd backward(const Eigen::MatrixXd &);
+    ReLU() = default;
+    ~ReLU() = default;
+    // Forward pass: applies ReLU activation
+    Eigen::MatrixXd forward(const Eigen::MatrixXd& input);
+    // Backward pass: computes gradient w.r.t. input
+    Eigen::MatrixXd backward(const Eigen::MatrixXd& grad_output);
 };
-inline ReLU::ReLU()= default;
-inline ReLU::~ReLU()= default;
 
 inline Eigen::MatrixXd ReLU::forward(const Eigen::MatrixXd& input) {
-    lastInput = input; // Saving input for use in backward computation
-    // Computing element-wise maximum with zero
-    return input.cwiseMax(0.0);
+    input_cache = input;
+    return input.cwiseMax(0.0);  // Element-wise max with 0 (ReLU)
 }
 
-inline Eigen::MatrixXd ReLU::backward(const Eigen::MatrixXd& error) {
-    // Computing mask by checking positive elements
-    Eigen::MatrixXd mask = (lastInput.array() >= 0.0).cast<double>();
-    // Multiplying error with mask element-wise
-    return error.block(0,0,
-        lastInput.rows(),lastInput.cols()).array() * mask.array();
+inline Eigen::MatrixXd ReLU::backward(const Eigen::MatrixXd& grad_output) {
+    // Gradient mask: 1 where input was > 0, else 0
+    Eigen::MatrixXd relu_derivative = (input_cache.array() > 0.0).cast<double>();
+    return grad_output.array() * relu_derivative.array();  // Element-wise product
 }
-#endif //RELU_HPP
+
+#endif // RELU_HPP

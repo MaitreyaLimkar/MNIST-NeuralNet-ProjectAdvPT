@@ -7,66 +7,69 @@
 #include <cstring>
 #include <Eigen/Dense>
 
-class DatasetLabels {
+class readLabelMNIST {
 private:
     size_t batch_size_temp;
     size_t number_of_labels_temp;
     std::vector<Eigen::MatrixXd> batches_temp;
 
 public:
-    explicit DatasetLabels(size_t batch_size);
-    ~DatasetLabels();
-    void readLabelData(const std::string &filepath);
-    void writeLabelToFile(const std::string &filepath, size_t index);
+    explicit readLabelMNIST(size_t batch_size);
+    ~readLabelMNIST();
+    void readLabelData(const std::string &input_filepath);
+    void writeLabelToFile(const std::string &output_filepath, size_t index);
     Eigen::MatrixXd getBatch(size_t index);
     size_t getNumBatches() const { return batches_temp.size(); }
 };
 
-DatasetLabels::DatasetLabels(size_t batch_size)
+inline readLabelMNIST::readLabelMNIST(size_t batch_size)
     : batch_size_temp(batch_size), number_of_labels_temp(0) {}
 
-DatasetLabels::~DatasetLabels() {}
+inline readLabelMNIST::~readLabelMNIST() {}
 
-Eigen::MatrixXd DatasetLabels::getBatch(size_t index) {
+inline Eigen::MatrixXd readLabelMNIST::getBatch(size_t index) {
     return batches_temp[index];
 }
 
-void DatasetLabels::readLabelData(const std::string &input_filepath) {
+inline void readLabelMNIST::readLabelData(const std::string &input_filepath) {
     std::ifstream input_file(input_filepath, std::ios::binary);
     if (!input_file.is_open()) {
         std::cerr << "Unable to open file " << input_filepath << std::endl;
         return;
     }
 
-    char bin_data[4];
-    // Magic number
-    input_file.read(bin_data, 4);
-    std::reverse(bin_data, bin_data + 4);
+    char binary_data[4];
+    // Read and reverse magic number
+    input_file.read(binary_data, 4);
+    std::reverse(std::begin(binary_data), std::end(binary_data));
     int magic_number = 0;
-    std::memcpy(&magic_number, bin_data, sizeof(int));
+    std::memcpy(&magic_number, binary_data, sizeof(int));
 
-    // Number of labels
-    input_file.read(bin_data, 4);
-    std::reverse(bin_data, bin_data + 4);
-    int number_of_labels = 0;
-    std::memcpy(&number_of_labels, bin_data, sizeof(int));
-    number_of_labels_temp = number_of_labels;
+    // Read and reverse number of labels
+    input_file.read(binary_data, 4);
+    std::reverse(std::begin(binary_data), std::end(binary_data));
+    std::memcpy(&number_of_labels_temp, binary_data, sizeof(int));
 
-    // Build batches: each batch is [batch_size_temp x 10]
-    Eigen::MatrixXd label_matrix(batch_size_temp, 10);
+    constexpr int num_classes = 10;
+    Eigen::MatrixXd label_matrix(batch_size_temp, num_classes);
     label_matrix.setZero();
     size_t batch_filler = 0;
 
-    for(size_t i = 0; i < number_of_labels_temp; i++) {
-        uint8_t byte = 0;
-        input_file.read(reinterpret_cast<char *>(&byte), 1);
-        int label = static_cast<int>(byte);
-        label_matrix(batch_filler, label) = 1.0;
-        batch_filler++;
+    for (size_t i = 0; i < number_of_labels_temp; ++i) {
+        uint8_t label_byte = 0;
+        input_file.read(reinterpret_cast<char*>(&label_byte), 1);
+        int label = static_cast<int>(label_byte);
 
-        if(batch_filler == batch_size_temp || (i == number_of_labels_temp - 1)) {
-            size_t validRows = batch_filler;
-            batches_temp.push_back(label_matrix.topRows(validRows));
+        if (label >= 0 && label < num_classes) {
+            label_matrix(batch_filler, label) = 1.0;
+        } else {
+            std::cerr << "Warning: Invalid label " << label << " at index " << i << std::endl;
+        }
+
+        batch_filler++;
+        // Push full or final batch
+        if (batch_filler == batch_size_temp || i == number_of_labels_temp - 1) {
+            batches_temp.emplace_back(label_matrix.topRows(batch_filler));
             label_matrix.setZero();
             batch_filler = 0;
         }
@@ -74,25 +77,34 @@ void DatasetLabels::readLabelData(const std::string &input_filepath) {
     input_file.close();
 }
 
-void DatasetLabels::writeLabelToFile(const std::string &output_filepath, size_t index) {
+inline void readLabelMNIST::writeLabelToFile(const std::string &output_filepath, size_t index) {
     size_t batch_no = index / batch_size_temp;
     size_t row_in_batch = index % batch_size_temp;
 
+    // Error handling for out-of-range indexes
     if (batch_no >= batches_temp.size() || row_in_batch >= batches_temp[batch_no].rows()) {
-        std::cerr << "Index out of range." << std::endl;
+        std::cerr << "Error: Label index " << index << " is out of range." << std::endl;
         return;
     }
 
+    // Open output file for writing
     std::ofstream output_file(output_filepath);
-    if(!output_file.is_open()) {
-        std::cerr << "Unable to open file " << output_filepath << std::endl;
+    if (!output_file.is_open()) {
+        std::cerr << "Error: Unable to open file for writing: " << output_filepath << std::endl;
         return;
     }
-    output_file << 1 << "\n";
-    output_file << 10 << "\n";
 
-    for(int i = 0; i < 10; i++) {
-        output_file << batches_temp[batch_no](row_in_batch, i) << "\n";
+    // Use stringstream for efficient writing
+    std::ostringstream buffer;
+    buffer << "1\n" // Tensor rank
+           << "10\n"; // One-hot encoding size
+
+    // Write label data
+    for (int i = 0; i < 10; ++i) {
+        buffer << batches_temp.at(batch_no)(row_in_batch, i) << "\n";
     }
+
+    // Write buffer content to file in one operation (faster I/O)
+    output_file << buffer.str();
     output_file.close();
 }

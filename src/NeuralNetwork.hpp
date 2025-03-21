@@ -92,13 +92,13 @@ public:
         auto start_time = std::chrono::steady_clock::now();
         const double time_limit_seconds = 20.0 * 60.0; // 20 minutes
 
-        DataSetImages trainData(batchSize);
+        readImageMNIST trainData(batchSize);
         trainData.readImageData(trainDataPath);
 
-        DatasetLabels trainLabels(batchSize);
+        readLabelMNIST trainLabels(batchSize);
         trainLabels.readLabelData(trainLabelsPath);
 
-        size_t numBatches = trainData.getNoOfBatches();
+        size_t numBatches = trainData.getNumOfBatches();
 
         for (int epoch = 0; epoch < numEpochs; epoch++)
         {
@@ -142,10 +142,10 @@ public:
     // Testing routine: Loads test data and labels, logs predictions, and computes accuracy.
     void test()
     {
-        DataSetImages testDataObj(batchSize);
+        readImageMNIST testDataObj(batchSize);
         testDataObj.readImageData(testDataPath);
 
-        DatasetLabels testLabelsObj(batchSize);
+        readLabelMNIST testLabelsObj(batchSize);
         testLabelsObj.readLabelData(testLabelsPath);
 
         std::ofstream predictionLogFile(predictionLogFilePath);
@@ -155,7 +155,7 @@ public:
             return;
         }
 
-        size_t numTestBatches = testDataObj.getNoOfBatches();
+        size_t numTestBatches = testDataObj.getNumOfBatches();
         int totalSamples = 0;
         int correctPredictions = 0;
 
@@ -166,7 +166,7 @@ public:
             Eigen::MatrixXd batchImages = testDataObj.getBatch(b);
             Eigen::MatrixXd predictions = forward(batchImages);
             Eigen::MatrixXd batchLabels = testLabelsObj.getBatch(b);
-            #pragma opm parallel for
+
             for (int i = 0; i < predictions.rows(); i++)
             {
                 Eigen::Index predLabel;

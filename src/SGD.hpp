@@ -23,11 +23,11 @@ Eigen::MatrixXd SGD::update_weights(Eigen::MatrixXd &weights, const Eigen::Matri
     return weights - learningRate * gradient;
 }
 
-/* ---- He Uniform Initialization ---- */
-inline Eigen::MatrixXd heUniformInit(int outDim, int inDim, unsigned int seed = 1337)
+/* ---- Xavier Uniform Initialization ---- */
+inline Eigen::MatrixXd XavierUniformInit(int outDim, int inDim, unsigned int seed = 1337)
 {
     static std::mt19937 rng(seed);
-    double limit = std::sqrt(6.0 / double(inDim));
+    double limit = std::sqrt(6.0 / double(inDim + outDim));
     std::uniform_real_distribution<double> dist(-limit, limit);
     Eigen::MatrixXd W(outDim, inDim);
     for (int r = 0; r < outDim; ++r) {
