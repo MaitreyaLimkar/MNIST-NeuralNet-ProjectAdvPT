@@ -1,4 +1,4 @@
-# AdvPT Project WS 2023: Handwriting Recognition (MNIST)
+# AdvPT Project WS 2024-25: Handwriting Recognition (MNIST)
 
 This project template contains some files to get your project started.
 
