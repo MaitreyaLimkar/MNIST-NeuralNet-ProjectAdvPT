@@ -1,0 +1,5 @@
+project(readLabelMNIST)
+add_executable(${PROJECT_NAME} readLabelMNIST.cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PRIVATE eigen)
+target_link_options(${PROJECT_NAME} PRIVATE -pg)

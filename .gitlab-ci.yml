@@ -1,0 +1,44 @@
+stages:
+  - test
+
+# test dataset image reader by checking generated outputs with expected results
+.read_dataset_images: &read_dataset_images
+  - chmod +x read_dataset_images.sh
+  - bash read_dataset_images.sh mnist-datasets/train-images.idx3-ubyte image_out.txt 0
+  - python3 compare_files.py image_out.txt expected-results/out-tensor-single-image.txt
+
+# test dataset label reader by checking generated outputs with expected results
+.read_dataset_labels: &read_dataset_labels
+  - chmod +x read_dataset_labels.sh
+  - bash read_dataset_labels.sh mnist-datasets/train-labels.idx1-ubyte label_out.txt 0
+  - python3 compare_files.py label_out.txt expected-results/out-tensor-single-label.txt
+
+# train and test neural network with MNIST dataset
+.mnist_single_image: &mnist_single_image
+  - chmod +x mnist.sh
+  - bash mnist.sh mnist-configs/input-ci.config
+  - python3 compare_files.py log_predictions-ci.txt expected-results/out-prediction-log-single-image.txt
+
+.build_template:
+  stage: test
+  script:
+    - export
+    - $CXX --version
+    - cmake --version
+    - ccache --version
+    - chmod +x build.sh
+    - bash build.sh
+    - *read_dataset_images
+    - *read_dataset_labels
+    - *mnist_single_image
+  allow_failure: true
+  tags:
+    - docker
+
+gcc_12_serial:
+  extends: .build_template
+  image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc-12:latest
+  tags:
+    - docker
+
+
